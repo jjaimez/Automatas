@@ -1,202 +1,202 @@
 package automata;
 
+import static automata.FA.Lambda;
+import java.util.Iterator;
 import java.util.Set;
 
 import utils.Triple;
 
 /* Implements a DFA (Deterministic Finite Atomaton).
-*/
+ */
 public class DFA extends FA {
-Set<State> states;
-Set<Character> alphabet;
-Set<Triple<State,Character,State>> transitions;
-State initial;
-Set<State> final_states;
-    
-	/*	
-	 * 	Construction
-	*/
-	
-	// Constructor
-	public DFA(Set<State> states,Set<Character> alphabet,Set<Triple<State,Character,State>> transitions,
-			State initial,Set<State> final_states) throws IllegalArgumentException
-	{	
-            this.states.addAll(states);
-            this.alphabet.addAll(alphabet);
-            this.transitions.addAll(transitions);
-            this.initial = initial;
-            this.final_states = final_states;
-            
-	}
-	
-	/*
-	 *	State querying 
-	*/
-	
-	
-	@Override
-	public Set<State> states() {
-		// TODO
-		return states;
-	}
 
-	@Override
-	public Set<Character> alphabet() {
-		// TODO
-		return alphabet;
-	}
-	
-	@Override
-	public State initial_state() {
-		// TODO
-		return initial;
-	}
+    private boolean isDeterministic;
 
-	@Override
-	public Set<State> final_states() {
-		// TODO
-		return final_states;
-	}
-	
-	@Override
-	public State delta(State from, Character c) {
-		assert states().contains(from);
-		assert alphabet().contains(c);
-		// TODO
-		return null;
-	}
-	
-	@Override
-	public String to_dot() {
-		assert rep_ok();
-		// TODO
-		return null;
-	}
-	
-	
-	/*
-	 *  Automata methods
-	*/
-	
-	
-	@Override
-	public boolean accepts(String string) {
-		assert rep_ok();
-		assert string != null;
-		assert verify_string(string);
-		// TODO
-		return false;
-	}
+    /*	
+     * 	Construction
+     */
+    // Constructor
+    public DFA(Set<State> states, Set<Character> alphabet, Set<Triple<State, Character, State>> transitions,
+            State initial, Set<State> final_states) throws IllegalArgumentException {
+        this.states.addAll(states);
+        this.alphabet.addAll(alphabet);
+        this.transitions.addAll(transitions);
+        this.initial = initial;
+        this.final_states = final_states;
 
-	/**
-	 * Converts the automaton to a NFA.
-	 * 
-	 * @return NFA recognizing the same language.
-	 */
-	public NFA toNFA() {
-		assert rep_ok();
-		// TODO
-		return null;
-	}
-	
-	/**
-	 * Converts the automaton to a NFALambda.
-	 * 
-	 * @return NFALambda recognizing the same language.
-	 */
-	public NFALambda toNFALambda() {
-		assert rep_ok();
-		// TODO
-		return null;
-	}
+    }
 
-	/**
-	 * Checks the automaton for language emptiness.
-	 * 
-	 * @returns True iff the automaton's language is empty.
-	 */
-	public boolean is_empty() {
-		assert rep_ok();
-		// TODO
-		return states.isEmpty();
-	}
+    /*
+     *	State querying 
+     */
+    @Override
+    public Set<State> states() {
+        // TODO
+        return states;
+    }
 
-	/**
-	 * Checks the automaton for language infinity.
-	 * 
-	 * @returns True iff the automaton's language is finite.
-	 */
-	public boolean is_finite() {
-		assert rep_ok();
-		// TODO
-		return false;		
-	}
-	
-	/**
-	 * Returns a new automaton which recognizes the complementary
-	 * language. 
-	 * 
-	 * @returns a new DFA accepting the language's complement.
-	 */
-	public DFA complement() {
-		assert rep_ok();
-                Set<State> finaStates = null;
-                finaStates.addAll(states);
-                finaStates.removeAll(final_states);
-                DFA complemento = new DFA(states,alphabet,transitions,initial,finaStates);
-		return complemento;		
-	}
-	
-	/**
-	 * Returns a new automaton which recognizes the kleene closure
-	 * of language. 
-	 * 
-	 * @returns a new DFA accepting the language's complement.
-	 */
-	public DFA star() {
-		assert rep_ok();
-		// TODO
-		return null;		
-	}
-	
-	/**
-	 * Returns a new automaton which recognizes the union of both
-	 * languages, the one accepted by 'this' and the one represented
-	 * by 'other'. 
-	 * 
-	 * @returns a new DFA accepting the union of both languages.
-	 */	
-	public DFA union(DFA other) {
-		assert rep_ok();
-		assert other.rep_ok();
-		// TODO
-		return null;		
-	}	
-	
-	/**
-	 * Returns a new automaton which recognizes the intersection of both
-	 * languages, the one accepted by 'this' and the one represented
-	 * by 'other'. 
-	 * 
-	 * @returns a new DFA accepting the intersection of both languages.
-	 */	
-	public DFA intersection(DFA other) {
-		assert rep_ok();
-		assert other.rep_ok();
-		// TODO
-		return null;		
-	}
+    @Override
+    public Set<Character> alphabet() {
+        // TODO
+        return alphabet;
+    }
 
-	@Override
-	public boolean rep_ok() {
-		// TODO: Check that the alphabet does not contains lambda.
-		// TODO: Check that initial and final states are included in 'states'.
-		// TODO: Check that all transitions are correct. All states and characters should be part of the automaton set of states and alphabet.
-		// TODO: Check that the transition relation is deterministic.
-		return true;
-	}
+    @Override
+    public State initial_state() {
+        // TODO
+        return initial;
+    }
 
+    @Override
+    public Set<State> final_states() {
+        // TODO
+        return final_states;
+    }
 
-	
+    @Override
+    public State delta(State from, Character c) {
+        assert states().contains(from);
+        assert alphabet().contains(c);
+        Iterator it = transitions.iterator();
+        while (it.hasNext()) {
+            Triple t = (Triple) it.next();
+            if (((State) t.first()).equals(from) && ((Character) t.second()).equals(c)) {
+                return (State) t.third();
+            }
+        }
+        return null;
+    }
 
+    @Override
+    public String to_dot() {
+        assert rep_ok();
+        // TODO
+        return null;
+    }
+
+    /*
+     *  Automata methods
+     */
+    @Override
+    public boolean accepts(String string) {
+        assert rep_ok();
+        assert string != null;
+        assert verify_string(string);
+        // TODO
+        return false;
+    }
+
+    /**
+     * Converts the automaton to a NFA.
+     *
+     * @return NFA recognizing the same language.
+     */
+    public NFA toNFA() {
+        assert rep_ok();
+        // TODO
+        return null;
+    }
+
+    /**
+     * Converts the automaton to a NFALambda.
+     *
+     * @return NFALambda recognizing the same language.
+     */
+    public NFALambda toNFALambda() {
+        assert rep_ok();
+        // TODO
+        return null;
+    }
+
+    /**
+     * Checks the automaton for language emptiness.
+     *
+     * @returns True iff the automaton's language is empty.
+     */
+    public boolean is_empty() {
+        assert rep_ok();
+        // TODO
+        return states.isEmpty();
+    }
+
+    /**
+     * Checks the automaton for language infinity.
+     *
+     * @returns True iff the automaton's language is finite.
+     */
+    public boolean is_finite() {
+        assert rep_ok();
+        // TODO
+        return false;
+    }
+
+    /**
+     * Returns a new automaton which recognizes the complementary language.
+     *
+     * @returns a new DFA accepting the language's complement.
+     */
+    public DFA complement() {
+        assert rep_ok();
+        Set<State> finaStates = null;
+        finaStates.addAll(states);
+        finaStates.removeAll(final_states);
+        DFA complemento = new DFA(states, alphabet, transitions, initial, finaStates);
+        return complemento;
+    }
+
+    /**
+     * Returns a new automaton which recognizes the kleene closure of language.
+     *
+     * @returns a new DFA accepting the language's complement.
+     */
+    public DFA star() {
+        assert rep_ok();
+        // TODO
+        return null;
+    }
+
+    /**
+     * Returns a new automaton which recognizes the union of both languages, the
+     * one accepted by 'this' and the one represented by 'other'.
+     *
+     * @returns a new DFA accepting the union of both languages.
+     */
+    public DFA union(DFA other) {
+        assert rep_ok();
+        assert other.rep_ok();
+        // TODO
+        return null;
+    }
+
+    /**
+     * Returns a new automaton which recognizes the intersection of both
+     * languages, the one accepted by 'this' and the one represented by 'other'.
+     *
+     * @returns a new DFA accepting the intersection of both languages.
+     */
+    public DFA intersection(DFA other) {
+        assert rep_ok();
+        assert other.rep_ok();
+        // TODO
+        return null;
+    }
+
+    @Override
+    public boolean rep_ok() {
+        return (!alphabet.contains(Lambda)) && states.contains(initial) && transitionsAreCorrect() && isDeterministic();
+        // TODO: Check that the alphabet does not contains lambda.
+        // TODO: Check that initial and final states are included in 'states'.
+        // TODO: Check that all transitions are correct. All states and characters should be part of the automaton set of states and alphabet.
+        // TODO: Check that the transition relation is deterministic.
+    }
+
+    // TODO: Check that all transitions are correct. All states and characters should be part of the automaton set of states and alphabet.
+    private boolean transitionsAreCorrect() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+// TODO: Check that the transition relation is deterministic.
+    private boolean isDeterministic() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
