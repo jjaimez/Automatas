@@ -1,5 +1,6 @@
 package automata;
 
+import static automata.FA.Lambda;
 import java.util.Set;
 
 import utils.Triple;
@@ -24,32 +25,31 @@ public class NFALambda extends FA {
 
 	
 	/*
-	 *	State querying 
-	*/
+     *	State querying 
+     */
+    @Override
+    public Set<State> states() {
+        // TODO
+        return states;
+    }
 
-	@Override
-	public Set<State> states() {
-		// TODO
-		return null;
-	}
+    @Override
+    public Set<Character> alphabet() {
+        // TODO
+        return alphabet;
+    }
 
-	@Override
-	public Set<Character> alphabet() {
-		// TODO
-		return null;
-	}
+    @Override
+    public State initial_state() {
+        // TODO
+        return initial;
+    }
 
-	@Override
-	public State initial_state() {
-		// TODO
-		return null;
-	}
-
-	@Override
-	public Set<State> final_states() {
-		// TODO
-		return null;
-	}
+    @Override
+    public Set<State> final_states() {
+        // TODO
+        return final_states;
+    }
 
 	@Override
 	public Set<State> delta(State from, Character c) {
@@ -94,10 +94,14 @@ public class NFALambda extends FA {
 	
 	@Override
 	public boolean rep_ok() {
+            return states.contains(initial) && transitionsAreCorrect();
 		// TODO: Check that initial and final states are included in 'states'.
 		// TODO: Check that all transitions are correct. All states and characters should be part of the automaton set of states and alphabet.
 
-		return true;
 	}
+
+    private boolean transitionsAreCorrect() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 
 }
