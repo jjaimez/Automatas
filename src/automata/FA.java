@@ -101,7 +101,7 @@ public abstract class FA {
                     
                 }
     }
-           System.out.println("Tipo: "+ tipo);
+           /*System.out.println("Tipo: "+ tipo);
            System.out.print("Inicial: "+inicio.name()+ "\nEstados: ");
            for(State s: hashStates){
                System.out.print(s.name()+", ");
@@ -117,7 +117,7 @@ public abstract class FA {
            System.out.print("\n Estados finales: ");
            for(State s: hashFinal){
                System.out.print(s.name()+", ");
-           }
+           }*/
 
            if(tipo==Tipo.DFA)
               return new DFA(hashStates, hashAl, hashTrans, inicio, hashStates);
@@ -192,6 +192,7 @@ public abstract class FA {
             if(!alphabet().contains(chars[i])){
                 ret=false;
             }
+            i++;
         }
         return ret;
     }
@@ -200,6 +201,6 @@ public abstract class FA {
      * @return True iff the automaton is in a consistent state.
      */
     public abstract boolean rep_ok();
+   
     
- 
 }
