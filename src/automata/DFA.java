@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import utils.Triple;
@@ -15,10 +17,18 @@ public class DFA extends FA {
 
     private boolean isDeterministic;
 
+    public DFA() {
+        this.states = null;
+        this.alphabet = null;
+        this.transitions = null;
+        this.initial = null;
+        this.final_states = null;
+    }
     /*	
      * 	Construction
      */
     // Constructor
+
     public DFA(Set<State> states, Set<Character> alphabet, Set<Triple<State, Character, State>> transitions,
             State initial, Set<State> final_states) throws IllegalArgumentException {
         this.states = states;
@@ -78,18 +88,18 @@ public class DFA extends FA {
         ret.append("inic->");
         ret.append(initial.name());
         ret.append(";\n");
-           for(Triple tr: transitions){
-               ret.append(((State)tr.first()).name()); //desde
-               ret.append("->");
-               ret.append(((State)tr.third()).name()); //hasta
-               String aux= " [label=\""+tr.second()+"\"];\n";
-               ret.append(aux);
-           }
-           
-           for(State s: final_states){
-               ret.append(s.name());
-               ret.append("[shape=doublecircle];\n");
-           }
+        for (Triple tr : transitions) {
+            ret.append(((State) tr.first()).name()); //desde
+            ret.append("->");
+            ret.append(((State) tr.third()).name()); //hasta
+            String aux = " [label=\"" + tr.second() + "\"];\n";
+            ret.append(aux);
+        }
+
+        for (State s : final_states) {
+            ret.append(s.name());
+            ret.append("[shape=doublecircle];\n");
+        }
         ret.append("}");
         return ret.toString();
     }
@@ -116,8 +126,7 @@ public class DFA extends FA {
      */
     public NFA toNFA() {
         assert rep_ok();
-// TODO
-        return null;
+        return new NFA(states, alphabet, transitions, initial, final_states);
     }
 
     /**
@@ -128,7 +137,7 @@ public class DFA extends FA {
     public NFALambda toNFALambda() {
         assert rep_ok();
 // TODO
-        return null;
+        return new NFALambda(states, alphabet, transitions, initial, final_states);
     }
 
     /**
@@ -177,6 +186,40 @@ public class DFA extends FA {
         return null;
     }
 
+    
+    // luego de hacer el producto carteciano quedan Set<Set<State>>, une los nombres de los
+    //estados que estan dentro de los sets y deja un Set<State>
+    public static Set<State> nameUnion(Set<Set<State>> setSet) {
+        Iterator<Set<State>> it = setSet.iterator();
+        Set<State> s = new HashSet();
+        while (it.hasNext()) {
+            Iterator<State> it2 = it.next().iterator();
+            LinkedList<State> list = new LinkedList<State>();
+            while (it2.hasNext()) {
+                list.add(it2.next());
+            }
+            State s2 = new State(list.get(0).name() + list.get(1).name());
+            s.add(s2);
+        }
+        return s;
+    }
+
+    //realiza el producto carteciano entre conjuntos
+    private static Set<Set<State>> cartesianProduct(int index, Set<State>... sets) {
+        Set<Set<State>> ret = new HashSet<Set<State>>();
+        if (index == sets.length) {
+            ret.add(new HashSet<State>());
+        } else {
+            for (Object obj : sets[index]) {
+                for (Set<State> set : cartesianProduct(index + 1, sets)) {
+                    set.add((State) obj);
+                    ret.add(set);
+                }
+            }
+        }
+        return ret;
+    }
+
     /**
      * Returns a new automaton which recognizes the union of both languages, the
      * one accepted by 'this' and the one represented by 'other'.
@@ -186,7 +229,7 @@ public class DFA extends FA {
     public DFA union(DFA other) {
         assert rep_ok();
         assert other.rep_ok();
-// TODO
+
         return null;
     }
 
@@ -199,7 +242,13 @@ public class DFA extends FA {
     public DFA intersection(DFA other) {
         assert rep_ok();
         assert other.rep_ok();
-// TODO
+        if ((other.alphabet().size() == alphabet.size()) && (other.alphabet().containsAll(other.alphabet))) {
+            Set<Set<State>> newStates = cartesianProduct(0, other.states(), states);
+            Set<Set<State>> newFinal = cartesianProduct(0, final_states, other.final_states());
+            State newInital = new State(other.initial_state().name() + initial);
+            //faltaria las tranciciones
+            
+        }
         return null;
     }
 
@@ -273,5 +322,4 @@ public class DFA extends FA {
         }
         return temp;
     }
-
 }

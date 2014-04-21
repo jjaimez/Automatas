@@ -99,9 +99,15 @@ public class NFALambda extends FA {
 		// TODO: Check that all transitions are correct. All states and characters should be part of the automaton set of states and alphabet.
 
 	}
-
+    
+   //Check that all transitions are correct. All states and characters should be part of the automaton set of states and alphabet.
     private boolean transitionsAreCorrect() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+ boolean ret = true;
+        for (Triple t : transitions) {
+            ret = ret && states.contains((State) t.first());
+            ret = ret && states.contains((State) t.third());
+            ret = ret && (alphabet.contains(((Character) t.second())) || ((Character) t.second() == Lambda));
+        }
+        return ret;    }
 
 }

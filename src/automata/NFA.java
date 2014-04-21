@@ -1,6 +1,8 @@
 package automata;
 
 import static automata.FA.Lambda;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import utils.Triple;
@@ -82,6 +84,24 @@ public class NFA extends FA {
      */
     public DFA toDFA() {
         assert rep_ok();
+        Set<Triple<State, Character, State>> triplas = new HashSet();
+        Iterator<Triple<State, Character, State>> it = transitions.iterator();
+        Iterator<Triple<State, Character, State>> it1 = transitions.iterator();
+        Triple<State, Character, State> t1;
+        Triple<State, Character, State> t;
+        boolean aux = true;
+        while (it.hasNext() && aux) {
+            t = it.next();
+            while (it1.hasNext() && aux) {
+                t1 = it1.next();
+                if (((State) (t.first())).equals((State) t1.first()) && !((State) t.third()).equals((State) t1.third()) && (Character) t1.second() == (Character) t.second()) {
+                    State s = new State(t.third().name()+t1.third().name());
+                    Triple<State, Character, State> tripleAux = new Triple<State, Character, State>(t.first(),t.second(),s);
+                    triplas.add(tripleAux);
+                }
+            }
+
+        }
         // TODO
         return null;
     }
@@ -95,7 +115,14 @@ public class NFA extends FA {
 
     }
 
+    // Check that all transitions are correct. All states and characters should be part of the automaton set of states and alphabet.
     private boolean transitionsAreCorrect() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        boolean ret = true;
+        for (Triple t : transitions) {
+            ret = ret && states.contains((State) t.first());
+            ret = ret && states.contains((State) t.third());
+            ret = ret && alphabet.contains((Character) t.second());
+        }
+        return ret;
     }
 }
