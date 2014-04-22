@@ -189,8 +189,22 @@ public class DFA extends FA {
      */
     public DFA star() {
         assert rep_ok();
-// TODO
-        return null;
+        HashSet<Triple<State, Character, State>> trans =(HashSet<Triple<State, Character, State>>) transitions;
+        HashSet<State> finales = (HashSet<State>)final_states;
+        State inicial= new State("q0i");
+        finales.add(inicial);
+        for(char c: alphabet){
+            State to= delta(initial, c);
+            if(to!=null){
+                Triple<State, Character, State> tr= new Triple<>(inicial, c,to);
+                trans.add(tr);
+                for(State fin: final_states){
+                   Triple<State, Character, State> aux= new Triple<>(fin, c,to);
+                   trans.add(aux);
+                }
+            }
+        }
+        return new DFA(states, alphabet, trans, inicial, finales);
     }
 
     // luego de hacer el producto cartesiano quedan Set<Set<State>>, une los nombres de los
@@ -250,10 +264,7 @@ public class DFA extends FA {
                     for (Character alfab : alphabet) {
                         Character letra = alfab;
                         State hastaDFA1 = this.delta(estadosA, letra);
-                        System.out.println(estadosA.name() + " " + letra);
                         State hastaDFA2 = other.delta(estadosB, letra);
-                        System.out.println(estadosB.name() + " " + letra);
-                        System.out.println((hastaDFA1 != null) + " " + (hastaDFA2 != null));
                         Triple triple = new Triple(new State(estadoUnion), letra, new State("\"" + hastaDFA1.name() + "," + hastaDFA2.name() + "\""));
                         trans.add(triple);
                     }
@@ -264,15 +275,17 @@ public class DFA extends FA {
                 String aux = estados.name().replaceAll("\"", "");
                 String[] separar = aux.split(",");
                 for (int i = 0; i < separar.length && !existe; i++) {
-                    System.out.println(separar[i].substring(0, separar[i].length() - 2));
-                    State s = new State(separar[i].substring(0, separar[i].length() - 2));
+                    State s = new State(separar[i].substring(0, separar[i].length() - 1));
                     if (final_states.contains(s) || other.final_states.contains(s)) {
                         existe = true;
-                        finales.add(estados);
+                        String nombre="\"";
+                        for (String separar1 : separar) {
+                            nombre = nombre + separar1.substring(0, separar1.length() - 1)+",";
+                        }
+                        nombre=nombre.substring(0, nombre.length()-1)+"\"";
+                        finales.add(new State(nombre)); 
                     }
-
                 }
-
             }
 
             return new DFA(q, alphabet, trans, inicial, finales);
@@ -309,20 +322,24 @@ public class DFA extends FA {
                     }
                 }
             }
-            for (State estados : q) {
+for (State estados : q) {
                 existe = false;
                 String aux = estados.name().replaceAll("\"", "");
                 String[] separar = aux.split(",");
                 for (int i = 0; i < separar.length && !existe; i++) {
-                    State s = new State(separar[i]);
+                    State s = new State(separar[i].substring(0, separar[i].length() - 1));
                     if (final_states.contains(s) && other.final_states.contains(s)) {
                         existe = true;
-                        finales.add(estados);
+                        String nombre="\"";
+                        for (String separar1 : separar) {
+                            nombre = nombre + separar1.substring(0, separar1.length() - 1)+",";
+                        }
+                        nombre=nombre.substring(0, nombre.length()-1)+"\"";
+                        finales.add(new State(nombre)); 
                     }
-
                 }
-
             }
+
 
             return new DFA(q, alphabet, trans, inicial, finales);
         } else {
@@ -401,4 +418,59 @@ public class DFA extends FA {
         }
         return temp;
     }
+    
+    //dfs recursivo
+    HashSet<State> marcados=new HashSet<>();
+	public void dfs_R(State state){
+		if (state != null){
+			System.out.println(state.name()); //tramiento del elemento, mostramos los vertices.Acá debe ir el codigo de el tratamiento que se quiere dar
+			marcados.add(state);
+                        State aux=null;
+                        Iterator<Character> itChar= alphabet.iterator();
+                        while(itChar.hasNext()){
+                           aux= delta(state, itChar.next());
+                           if(aux!=null){
+                           if(!marcados.contains(aux)){
+                               dfs_R(aux);
+                           }
+                           }
+                        }
+			
+			}//end while
+		}//end if
+	
+    /*boolean containsCycle(){
+        HashSet<State> mark= new HashSet<>();
+        for(State s: states){
+            
+        }
+    }
+
+for each vertex v in g do:
+        if v.mark == WHITE then:
+            if visit(g, v) then:
+            return TRUE;
+fi;
+fi;
+od;
+return FALSE;
+
+    HashSet<State> gris=new HashSet<>();
+
+private boolean visit(State v){
+    gris.add(v);
+}
+
+for each edge (v, u) in g do:
+if u.mark == GREY then:
+return TRUE;
+else if u.mark == WHITE then:
+if visit(g, u) then:
+return TRUE;
+fi;
+fi;
+od;
+v.mark = BLACK;
+return FALSE;
+*/
 }
