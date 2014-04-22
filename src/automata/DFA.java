@@ -69,9 +69,7 @@ public class DFA extends FA {
     public State delta(State from, Character c) {
         assert states().contains(from);
         assert alphabet().contains(c);
-        Iterator it = transitions.iterator();
-        while (it.hasNext()) {
-            Triple t = (Triple) it.next();
+        for (Triple t : transitions) {
             if (((State) t.first()).equals(from) && ((Character) t.second()).equals(c)) {
                 return (State) t.third();
             }
@@ -115,7 +113,16 @@ public class DFA extends FA {
         assert repOk;
         assert distNul;
         assert verify;
-        return repOk && distNul && verify;
+        char[] carac = string.toCharArray();
+        State avanzo = initial;
+        for (int i = 0; i < carac.length; i++) {
+            avanzo = delta(avanzo, carac[i]);
+            if (avanzo == null) {
+                return false;
+            }
+        }
+        boolean ret = final_states.contains(avanzo);
+        return repOk && distNul && verify && ret;
 
     }
 
@@ -186,19 +193,20 @@ public class DFA extends FA {
         return null;
     }
 
-    
-    // luego de hacer el producto carteciano quedan Set<Set<State>>, une los nombres de los
+    // luego de hacer el producto cartesiano quedan Set<Set<State>>, une los nombres de los
     //estados que estan dentro de los sets y deja un Set<State>
     public static Set<State> nameUnion(Set<Set<State>> setSet) {
         Iterator<Set<State>> it = setSet.iterator();
         Set<State> s = new HashSet();
+        String concate = "";
         while (it.hasNext()) {
             Iterator<State> it2 = it.next().iterator();
             LinkedList<State> list = new LinkedList<State>();
             while (it2.hasNext()) {
                 list.add(it2.next());
             }
-            State s2 = new State(list.get(0).name() + list.get(1).name());
+
+            State s2 = new State("\"" + list.get(1).name() + "," + list.get(0).name() + "\"");
             s.add(s2);
         }
         return s;
@@ -212,7 +220,7 @@ public class DFA extends FA {
         } else {
             for (Object obj : sets[index]) {
                 for (Set<State> set : cartesianProduct(index + 1, sets)) {
-                    set.add((State) obj);
+                    set.add(new State(((State) obj).name() + index));
                     ret.add(set);
                 }
             }
@@ -229,8 +237,48 @@ public class DFA extends FA {
     public DFA union(DFA other) {
         assert rep_ok();
         assert other.rep_ok();
+        assert alphabet.equals(other.alphabet);
+        boolean existe;
+        if (alphabet.equals(other.alphabet)) {
+            HashSet<State> q = (HashSet) nameUnion(cartesianProduct(0, other.states, states));
+            HashSet<Triple<State, Character, State>> trans = new HashSet<>();
+            HashSet<State> finales = new HashSet<>();
+            State inicial = new State("\"" + initial.name() + "," + other.initial.name() + "\"");
+            for (State estadosA : states) {
+                for (State estadosB : other.states) {
+                    String estadoUnion = "\"" + estadosA.name() + "," + estadosB.name() + "\"";
+                    for (Character alfab : alphabet) {
+                        Character letra = alfab;
+                        State hastaDFA1 = this.delta(estadosA, letra);
+                        System.out.println(estadosA.name() + " " + letra);
+                        State hastaDFA2 = other.delta(estadosB, letra);
+                        System.out.println(estadosB.name() + " " + letra);
+                        System.out.println((hastaDFA1 != null) + " " + (hastaDFA2 != null));
+                        Triple triple = new Triple(new State(estadoUnion), letra, new State("\"" + hastaDFA1.name() + "," + hastaDFA2.name() + "\""));
+                        trans.add(triple);
+                    }
+                }
+            }
+            for (State estados : q) {
+                existe = false;
+                String aux = estados.name().replaceAll("\"", "");
+                String[] separar = aux.split(",");
+                for (int i = 0; i < separar.length && !existe; i++) {
+                    System.out.println(separar[i].substring(0, separar[i].length() - 2));
+                    State s = new State(separar[i].substring(0, separar[i].length() - 2));
+                    if (final_states.contains(s) || other.final_states.contains(s)) {
+                        existe = true;
+                        finales.add(estados);
+                    }
 
-        return null;
+                }
+
+            }
+
+            return new DFA(q, alphabet, trans, inicial, finales);
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -242,14 +290,44 @@ public class DFA extends FA {
     public DFA intersection(DFA other) {
         assert rep_ok();
         assert other.rep_ok();
-        if ((other.alphabet().size() == alphabet.size()) && (other.alphabet().containsAll(other.alphabet))) {
-            Set<Set<State>> newStates = cartesianProduct(0, other.states(), states);
-            Set<Set<State>> newFinal = cartesianProduct(0, final_states, other.final_states());
-            State newInital = new State(other.initial_state().name() + initial);
-            //faltaria las tranciciones
-            
+        boolean existe;
+        assert alphabet.equals(other.alphabet);
+        if (alphabet.equals(other.alphabet)) {
+            HashSet<State> q = (HashSet) nameUnion(cartesianProduct(0, other.states, states));
+            HashSet<Triple<State, Character, State>> trans = new HashSet<>();
+            HashSet<State> finales = new HashSet<>();
+            State inicial = new State("\"" + initial.name() + "," + other.initial.name() + "\"");
+            for (State estadosA : states) {
+                for (State estadosB : other.states) {
+                    String estadoUnion = "\"" + estadosA.name() + "," + estadosB.name() + "\"";
+                    for (Character alfab : alphabet) {
+                        Character letra = alfab;
+                        State hastaDFA1 = this.delta(estadosA, letra);
+                        State hastaDFA2 = other.delta(estadosB, letra);
+                        Triple triple = new Triple(new State(estadoUnion), letra, new State("\"" + hastaDFA1.name() + "," + hastaDFA2.name() + "\""));
+                        trans.add(triple);
+                    }
+                }
+            }
+            for (State estados : q) {
+                existe = false;
+                String aux = estados.name().replaceAll("\"", "");
+                String[] separar = aux.split(",");
+                for (int i = 0; i < separar.length && !existe; i++) {
+                    State s = new State(separar[i]);
+                    if (final_states.contains(s) && other.final_states.contains(s)) {
+                        existe = true;
+                        finales.add(estados);
+                    }
+
+                }
+
+            }
+
+            return new DFA(q, alphabet, trans, inicial, finales);
+        } else {
+            return null;
         }
-        return null;
     }
 
     @Override
@@ -293,8 +371,9 @@ public class DFA extends FA {
                 t1 = it1.next();
                 if (((State) (t.first())).equals((State) t1.first()) && !((State) t.third()).equals((State) t1.third()) && (Character) t1.second() == (Character) t.second()) {
                     aux = false;
+                    return false;
                 }
-                return false;
+
             }
 
         }
@@ -309,10 +388,10 @@ public class DFA extends FA {
      * @return The file (as a File object) that contains the source of the
      * graph.
      */
-    private File writeDotSourceToFile(String str) throws java.io.IOException {
+    public File writeDotSourceToFile(String str, String ruta) throws java.io.IOException {
         File temp;
         try {
-            temp = File.createTempFile("graph_", ".dot.tmp", new File("/tmp"));
+            temp = new File(ruta);
             FileWriter fout = new FileWriter(temp);
             fout.write(str);
             fout.close();

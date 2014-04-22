@@ -120,12 +120,12 @@ public abstract class FA {
            }*/
 
            if(tipo==Tipo.DFA)
-              return new DFA(hashStates, hashAl, hashTrans, inicio, hashStates);
+              return new DFA(hashStates, hashAl, hashTrans, inicio, hashFinal);
            else{
                if(tipo==Tipo.NFA)
-                  return new NFA(hashStates, hashAl, hashTrans, inicio, hashStates);
+                  return new NFA(hashStates, hashAl, hashTrans, inicio, hashFinal);
                else
-                 return  new NFALambda(hashStates, hashAl, hashTrans, inicio, hashStates);
+                 return  new NFALambda(hashStates, hashAl, hashTrans, inicio, hashFinal);
            }
     }
        
