@@ -40,4 +40,9 @@ public class State {
 			return false;
 		return true;
 	}
+        
+        public boolean containsComma(){
+            return _name.contains(",");
+        }
+        
 }

@@ -1,8 +1,11 @@
 package automata;
 
 import static automata.FA.Lambda;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import utils.Triple;
@@ -54,15 +57,59 @@ public class NFA extends FA {
     public Set<State> delta(State from, Character c) {
         assert states().contains(from);
         assert alphabet().contains(c);
-        // TODO
-        return null;
+        Set<State> s = new HashSet();
+        for (Triple t : transitions) {
+            if (((State) t.first()).equals(from) && ((Character) t.second()).equals(c)) {
+                s.add((State) t.third());
+            }
+        }
+        if (s.size() > 0) {
+            return s;
+        } else {
+            return null;
+        }
+    }
+
+    public Set<State> deltaComma(State from, Character c) {
+        Set<State> ret = new HashSet();
+        String aux = from.name().replaceAll("\"", "");
+        String[] separar = aux.split(",");
+        for (int i = 0; i < separar.length; i++) {
+            State s = new State(separar[i].substring(0, separar[i].length() - 2));
+            if (delta(s, c) != null) {
+                ret.addAll(delta(s, c));
+            }
+        }
+        if (ret.size() > 0) {
+            return ret;
+        } else {
+            return null;
+        }
     }
 
     @Override
     public String to_dot() {
         assert rep_ok();
-        // TODO
-        return null;
+         StringBuilder ret = new StringBuilder();
+        ret.append("digraph {\n");
+        ret.append("inic[shape=point]; \n");
+        ret.append("inic->");
+        ret.append(initial.name());
+        ret.append(";\n");
+        for (Triple tr : transitions) {
+            ret.append(((State) tr.first()).name()); //desde
+            ret.append("->");
+            ret.append(((State) tr.third()).name()); //hasta
+            String aux = " [label=\"" + tr.second() + "\"];\n";
+            ret.append(aux);
+        }
+
+        for (State s : final_states) {
+            ret.append(s.name());
+            ret.append("[shape=doublecircle];\n");
+        }
+        ret.append("}");
+        return ret.toString();
     }
 
     /*
@@ -77,6 +124,53 @@ public class NFA extends FA {
         return false;
     }
 
+    public static State nameUnion(Set<State> set) {
+        if ((set.isEmpty()) && (set != null)) {
+            return null;
+        } else {
+            Iterator<State> it = set.iterator();
+            if (set.size() == 1) {
+                return it.next();
+            } else {
+                String concate = "";
+                int i = 0;
+                while (it.hasNext()) {
+                    if (i == 0) {
+                        concate = ("\"" + it.next().name() + ",");
+                    } else {
+                        if (it.hasNext()) {
+                            concate = (it.next().name() + ",");
+                        } else {
+                            concate = (it.next().name() + "\"");
+                        }
+                    }
+                    i++;
+                }
+                State s = new State(concate);
+                return s;
+            }
+        }
+    }
+
+//    public Set<Set<State>> subconjuntos(Set<State> originalSet) {
+//        Set<Set<State>> sets = new HashSet<Set<State>>();
+//        if (originalSet.isEmpty()) {
+//            sets.add(new HashSet<State>());
+//            return sets;
+//        }
+//        List<State> list = new ArrayList<State>(originalSet);
+//        State head = list.get(0);
+//        Set<State> rest = new HashSet<State>(list.subList(1, list.size()));
+//        for (Set<State> set : subconjuntos(rest)) {
+//            Set<State> newSet = new HashSet<State>();
+//            newSet.add(head);
+//            newSet.addAll(set);
+//            sets.add(newSet);
+//            sets.add(set);
+//        }
+//        return sets;
+//    }
+
     /**
      * Converts the automaton to a DFA.
      *
@@ -84,26 +178,44 @@ public class NFA extends FA {
      */
     public DFA toDFA() {
         assert rep_ok();
-        Set<Triple<State, Character, State>> triplas = new HashSet();
-        Iterator<Triple<State, Character, State>> it = transitions.iterator();
-        Iterator<Triple<State, Character, State>> it1 = transitions.iterator();
-        Triple<State, Character, State> t1;
-        Triple<State, Character, State> t;
-        boolean aux = true;
-        while (it.hasNext() && aux) {
-            t = it.next();
-            while (it1.hasNext() && aux) {
-                t1 = it1.next();
-                if (((State) (t.first())).equals((State) t1.first()) && !((State) t.third()).equals((State) t1.third()) && (Character) t1.second() == (Character) t.second()) {
-                    State s = new State(t.third().name()+t1.third().name());
-                    Triple<State, Character, State> tripleAux = new Triple<State, Character, State>(t.first(),t.second(),s);
-                    triplas.add(tripleAux);
+        Set<State> newStates = new HashSet();
+        newStates.add(initial);
+        Set<State> newFinals = new HashSet();
+        Set<Triple<State, Character, State>> newTrans = new HashSet();
+        for (State estado : newStates) {
+            for (Character alfab : alphabet) {
+                if (estado.containsComma()) {
+                    State s = nameUnion(deltaComma(estado, alfab));
+                    if (s == null) {
+                        Triple<State, Character, State> t = new Triple<State, Character, State>(estado, alfab, s);
+                        newStates.add(s);
+                        newTrans.add(t);
+                    }
+                } else {
+                    State s = nameUnion(delta(estado, alfab));
+                    if (s == null) {
+                        Triple<State, Character, State> t = new Triple<State, Character, State>(estado, alfab, s);
+                        newStates.add(s);
+                        newTrans.add(t);
+                    }
                 }
+            }
+        }
+        for (State estados : newStates) {            
+            boolean existe = false;
+            String aux = estados.name().replaceAll("\"", "");
+            String[] separar = aux.split(",");
+            for (int i = 0; i < separar.length && !existe; i++) {
+                State s = new State(separar[i].substring(0, separar[i].length() - 2));
+                if (final_states.contains(s)) {
+                    existe = true;
+                    newFinals.add(estados);
+                }
+
             }
 
         }
-        // TODO
-        return null;
+        return new DFA(newStates, alphabet, newTrans, initial, newFinals);
     }
 
     @Override
