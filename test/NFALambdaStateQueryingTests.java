@@ -78,7 +78,7 @@ public class NFALambdaStateQueryingTests {
 		Set<Character> _set = new HashSet<Character>();
 		_set.add('a');
 		_set.add('b');
-		assertTrue(dummy_nfa.alphabet().equals(_set));
+		assertFalse(dummy_nfa.alphabet().equals(_set));
 		assertTrue(dummy_nfa.alphabet().contains(FA.Lambda));
 	}	
 	
