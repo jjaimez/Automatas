@@ -77,9 +77,9 @@ public class NFALambda extends FA {
         while (!trans.isEmpty()) {
             Triple<State, Character, State> t = trans.pop();
             utilizados.add(t);
-            if ((s.contains((State) t.first())) && ((Character) t.second()).equals(Lambda)) {                
+            if ((s.contains((State) t.first())) && ((Character) t.second()).equals(Lambda)) {
                 if (s.add((State) t.third())) {
-                  //  System.out.println("ESTADO AGREGADO A LA CLAUSURA "+ t.third().name());
+                    //  System.out.println("ESTADO AGREGADO A LA CLAUSURA "+ t.third().name());
                     trans.addAll(utilizados);
                 }
             }
@@ -265,7 +265,7 @@ public class NFALambda extends FA {
         for (Triple t : transitions) {
             ret = ret && states.contains((State) t.first());
             ret = ret && states.contains((State) t.third());
-           ret = ret && (alphabet.contains(((Character) t.second())));
+            ret = ret && (alphabet.contains(((Character) t.second())));
         }
         return ret;
     }

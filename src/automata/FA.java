@@ -1,12 +1,11 @@
 package automata;
 
-
 import java.io.*;
 import java.util.*;
 import utils.Triple;
 
 public abstract class FA {
-       
+
     Set<State> states;
     Set<Character> alphabet;
     Set<Triple<State, Character, State>> transitions;
@@ -29,106 +28,87 @@ public abstract class FA {
      * parsing process.
      */
     public static FA parse_form_file(String path) throws Exception {
-            FileReader in=null;
-            boolean afnd=false;
-            
-            HashSet<State> hashStates= new HashSet<>() ;
-            HashSet<Triple<State, Character, State>> hashTrans= new HashSet<>();
-            HashSet<Character> hashAl= new HashSet<>();
-            HashSet<State> hashFinal= new HashSet<>();
-            State inicio= null;
-            
-            Tipo tipo=Tipo.DFA;
-            StringBuilder sb = new StringBuilder();
-	   
-	   try
-	   {
-		   FileInputStream fis = new FileInputStream(new java.io.File(path).getAbsoluteFile()+".dot");
-		   DataInputStream dis = new DataInputStream(fis);
-		   BufferedReader br = new BufferedReader(new InputStreamReader(dis));
-		   String line;
-		   while ((line = br.readLine()) != null) {
-			   sb.append(line);
-		   }
-		   dis.close();
-	   } 
-	   catch (Exception e) {
-		   System.err.println("Error: " + e.getMessage());
-	   }
-	   
-           
-	   String ret= sb.toString();
-           ret=ret.replaceAll("\t",";");
-           ret= ret.replaceAll(" ","");
-           String[] sentencias= ret.split(";");
-           for(int i=0; i<sentencias.length ;i++  ){
-                if(sentencias[i].contains("inic->")){//inicial
-                    String inicial=sentencias[i].split("->")[1];
-                    inicio= new State(inicial);
-                }
-                else{
-                    if(sentencias[i].contains("->")){ //transicion
-                       String[] estados=sentencias[i].split("->");
-                       String desde= estados[0];
-                       String hasta= estados[1].split("\\[")[0];
-                       String etiqueta= estados[1].split("\"")[1];
-                       State desdeS=new State(desde);
-                        State hastaS=new State(hasta);
-                        char character=etiqueta.charAt(0);
-                        if(character==Lambda)
-                            tipo= Tipo.NFALambda;
-                        hashStates.add(desdeS);
-                        hashStates.add(hastaS);
-                        hashAl.add(character);
-                        hashTrans.add(new Triple(desdeS,character,hastaS));
-                        Iterator<Triple<State,Character,State>> it= hashTrans.iterator();
-                        Triple aux;
-                        while(it.hasNext() && !afnd){
-                               aux= it.next();
-                               if((desdeS).equals(aux.first()) && !hastaS.equals(aux.third()) && (Character)aux.second()==character){
-                                   afnd=true; //es no determinista
-                                   tipo=Tipo.NFA;
-                               }
-                        }
-                        
-                    }
-                    else{
-                        if(sentencias[i].contains("[shape=doublecircle]")){ //estado final!
-                            hashFinal.add(new State(sentencias[i].split("\\[")[0]));
-                        }
-                    }
-                    
-                    
-                }
-    }
-           /*System.out.println("Tipo: "+ tipo);
-           System.out.print("Inicial: "+inicio.name()+ "\nEstados: ");
-           for(State s: hashStates){
-               System.out.print(s.name()+", ");
-           }
-           System.out.print("\nTransiciones: cant: "+hashTrans.size());
-           for(Triple tr: hashTrans){
-                System.out.print("***desde: "+((State)tr.first()).name()+" consumiendo: "+ tr.second()+" hasta: "+ ((State)tr.third()).name()+", ");
-           }
-           System.out.print("\n alfabeto: ");
-           for(Character cha: hashAl){
-               System.out.print(cha+", ");
-           }
-           System.out.print("\n Estados finales: ");
-           for(State s: hashFinal){
-               System.out.print(s.name()+", ");
-           }*/
+        FileReader in = null;
+        boolean afnd = false;
 
-           if(tipo==Tipo.DFA)
-              return new DFA(hashStates, hashAl, hashTrans, inicio, hashFinal);
-           else{
-               if(tipo==Tipo.NFA)
-                  return new NFA(hashStates, hashAl, hashTrans, inicio, hashFinal);
-               else
-                 return  new NFALambda(hashStates, hashAl, hashTrans, inicio, hashFinal);
-           }
+        HashSet<State> hashStates = new HashSet<>();
+        HashSet<Triple<State, Character, State>> hashTrans = new HashSet<>();
+        HashSet<Character> hashAl = new HashSet<>();
+        HashSet<State> hashFinal = new HashSet<>();
+        State inicio = null;
+
+        Tipo tipo = Tipo.DFA;
+        StringBuilder sb = new StringBuilder();
+
+        try {
+            FileInputStream fis = new FileInputStream(new java.io.File(path).getAbsoluteFile() + ".dot");
+            DataInputStream dis = new DataInputStream(fis);
+            BufferedReader br = new BufferedReader(new InputStreamReader(dis));
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            dis.close();
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+
+
+        String ret = sb.toString();
+        ret = ret.replaceAll("\t", ";");
+        ret = ret.replaceAll(" ", "");
+        String[] sentencias = ret.split(";");
+        for (int i = 0; i < sentencias.length; i++) {
+            if (sentencias[i].contains("inic->")) {//inicial
+                String inicial = sentencias[i].split("->")[1];
+                inicio = new State(inicial);
+            } else {
+                if (sentencias[i].contains("->")) { //transicion
+                    String[] estados = sentencias[i].split("->");
+                    String desde = estados[0];
+                    String hasta = estados[1].split("\\[")[0];
+                    String etiqueta = estados[1].split("\"")[1];
+                    State desdeS = new State(desde);
+                    State hastaS = new State(hasta);
+                    char character = etiqueta.charAt(0);
+                    if (character == Lambda) {
+                        tipo = Tipo.NFALambda;
+                    }
+                    hashStates.add(desdeS);
+                    hashStates.add(hastaS);
+                    hashAl.add(character);
+                    hashTrans.add(new Triple(desdeS, character, hastaS));
+                    Iterator<Triple<State, Character, State>> it = hashTrans.iterator();
+                    Triple aux;
+                    while (it.hasNext() && !afnd) {
+                        aux = it.next();
+                        if ((desdeS).equals(aux.first()) && !hastaS.equals(aux.third()) && (Character) aux.second() == character) {
+                            afnd = true; //es no determinista
+                            tipo = Tipo.NFA;
+                        }
+                    }
+
+                } else {
+                    if (sentencias[i].contains("[shape=doublecircle]")) { //estado final!
+                        hashFinal.add(new State(sentencias[i].split("\\[")[0]));
+                    }
+                }
+
+
+            }
+        }
+
+        if (tipo == Tipo.DFA) {
+            return new DFA(hashStates, hashAl, hashTrans, inicio, hashFinal);
+        } else {
+            if (tipo == Tipo.NFA) {
+                return new NFA(hashStates, hashAl, hashTrans, inicio, hashFinal);
+            } else {
+                return new NFALambda(hashStates, hashAl, hashTrans, inicio, hashFinal);
+            }
+        }
     }
-       
+
     /*
      * 	State Querying
      */
@@ -185,12 +165,12 @@ public abstract class FA {
      * @return True iff the string consists only of characters in the alphabet.
      */
     public boolean verify_string(String s) {
-        boolean ret=true;
-        char[]chars=s.toCharArray();
-        int i=0;
-        while (i<chars.length && ret){
-            if(!alphabet().contains(chars[i])){
-                ret=false;
+        boolean ret = true;
+        char[] chars = s.toCharArray();
+        int i = 0;
+        while (i < chars.length && ret) {
+            if (!alphabet().contains(chars[i])) {
+                ret = false;
             }
             i++;
         }
@@ -201,6 +181,4 @@ public abstract class FA {
      * @return True iff the automaton is in a consistent state.
      */
     public abstract boolean rep_ok();
-   
-    
 }

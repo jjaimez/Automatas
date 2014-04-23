@@ -39,7 +39,7 @@ public class DFA extends FA {
             throw new java.lang.IllegalArgumentException("Las transiciones son incorrectas");
         }
         if(!states.contains(initial)){
-            throw new java.lang.IllegalArgumentException("El estado innicial no pertenece a los estados");
+            throw new java.lang.IllegalArgumentException("El estado inicial no pertenece a los estados");
         }
         if(!isDeterministic()){
             throw new java.lang.IllegalArgumentException("No es deterministico");
