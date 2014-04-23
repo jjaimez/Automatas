@@ -177,6 +177,7 @@ public class DFACreationTests {
 		finals.add(s1);
 		
 		DFA my_dfa = new DFA(states, alpha, transitions, initial, finals);
+                System.out.println(my_dfa.isDeterministic());
 	}
 	
 	@Test

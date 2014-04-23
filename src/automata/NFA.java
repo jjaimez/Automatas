@@ -23,6 +23,16 @@ public class NFA extends FA {
         this.transitions = transitions;
         this.initial = initial;
         this.final_states = final_states;
+        if(!this.states.containsAll(this.final_states)){
+           throw new java.lang.IllegalArgumentException("Los estados finales no estan incluidos en los estados");  
+        }
+        if(!transitionsAreCorrect()){
+            throw new java.lang.IllegalArgumentException("Las transiciones son incorrectas");
+        }
+        if(!states.contains(initial)){
+            throw new java.lang.IllegalArgumentException("El estado innicial no pertenece a los estados");
+        }
+        
     }
 
     /*
@@ -85,18 +95,18 @@ public class NFA extends FA {
         ret.append("digraph {\n");
         ret.append("inic[shape=point]; \n");
         ret.append("inic->");
-        ret.append(initial.name());
+        ret.append("\""+initial.name()+"\"");
         ret.append(";\n");
         for (Triple tr : transitions) {
-            ret.append(((State) tr.first()).name()); //desde
+            ret.append("\""+((State) tr.first()).name()+"\""); //desde
             ret.append("->");
-            ret.append(((State) tr.third()).name()); //hasta
+            ret.append("\""+((State) tr.third()).name()+"\""); //hasta
             String aux = " [label=\"" + tr.second() + "\"];\n";
             ret.append(aux);
         }
 
         for (State s : final_states) {
-            ret.append(s.name());
+            ret.append("\""+s.name()+"\"");
             ret.append("[shape=doublecircle];\n");
         }
         ret.append("}");
@@ -108,10 +118,10 @@ public class NFA extends FA {
      */
     @Override
     public boolean accepts(String string) {
-        assert rep_ok();
-        assert string != null;
-        assert verify_string(string);
-        // TODO
+        boolean repOk = rep_ok();
+        boolean distNul = string != null;
+        boolean verify = verify_string(string);
+
         return false;
     }
 

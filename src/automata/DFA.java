@@ -36,6 +36,20 @@ public class DFA extends FA {
         this.transitions = transitions;
         this.initial = initial;
         this.final_states = final_states;
+        if(!this.states.containsAll(this.final_states)){
+           throw new java.lang.IllegalArgumentException("Los estados finales no estan incluidos en los estados");  
+        }
+        if(!transitionsAreCorrect()){
+            throw new java.lang.IllegalArgumentException("Las transiciones son incorrectas");
+        }
+        if(!states.contains(initial)){
+            throw new java.lang.IllegalArgumentException("El estado innicial no pertenece a los estados");
+        }
+        if(!isDeterministic()){
+            throw new java.lang.IllegalArgumentException("No es deterministico");
+        }
+        
+
 
     }
 
@@ -67,8 +81,8 @@ public class DFA extends FA {
 
     @Override
     public State delta(State from, Character c) {
-        assert states().contains(from);
-        assert alphabet().contains(c);
+        //assert states().contains(from);
+        //assert alphabet().contains(c);
         for (Triple t : transitions) {
             if (((State) t.first()).equals(from) && ((Character) t.second()).equals(c)) {
                 return (State) t.third();
@@ -79,23 +93,23 @@ public class DFA extends FA {
 
     @Override
     public String to_dot() {
-        assert rep_ok();
-        StringBuilder ret = new StringBuilder();
+        //assert rep_ok();
+       StringBuilder ret = new StringBuilder();
         ret.append("digraph {\n");
         ret.append("inic[shape=point]; \n");
         ret.append("inic->");
-        ret.append(initial.name());
+        ret.append("\""+initial.name()+"\"");
         ret.append(";\n");
         for (Triple tr : transitions) {
-            ret.append(((State) tr.first()).name()); //desde
+            ret.append("\""+((State) tr.first()).name()+"\""); //desde
             ret.append("->");
-            ret.append(((State) tr.third()).name()); //hasta
+            ret.append("\""+((State) tr.third()).name()+"\""); //hasta
             String aux = " [label=\"" + tr.second() + "\"];\n";
             ret.append(aux);
         }
 
         for (State s : final_states) {
-            ret.append(s.name());
+            ret.append("\""+s.name()+"\"");
             ret.append("[shape=doublecircle];\n");
         }
         ret.append("}");
@@ -110,9 +124,10 @@ public class DFA extends FA {
         boolean repOk = rep_ok();
         boolean distNul = string != null;
         boolean verify = verify_string(string);
-        assert repOk;
-        assert distNul;
-        assert verify;
+
+        //assert repOk;
+        //assert distNul;
+        //assert verify;
         char[] carac = string.toCharArray();
         State avanzo = initial;
         for (int i = 0; i < carac.length; i++) {
@@ -132,7 +147,7 @@ public class DFA extends FA {
      * @return NFA recognizing the same language.
      */
     public NFA toNFA() {
-        assert rep_ok();
+        //assert rep_ok();
         return new NFA(states, alphabet, transitions, initial, final_states);
     }
 
@@ -142,7 +157,7 @@ public class DFA extends FA {
      * @return NFALambda recognizing the same language.
      */
     public NFALambda toNFALambda() {
-        assert rep_ok();
+        //assert rep_ok();
 // TODO
         return new NFALambda(states, alphabet, transitions, initial, final_states);
     }
@@ -153,8 +168,9 @@ public class DFA extends FA {
      * @returns True iff the automaton's language is empty.
      */
     public boolean is_empty() {
-        assert rep_ok();
-        return states.isEmpty();
+        //assert rep_ok();
+        ciclos = new HashSet<>();
+        return !llegueFinal(initial, false);
     }
 
     /**
@@ -163,9 +179,13 @@ public class DFA extends FA {
      * @returns True iff the automaton's language is finite.
      */
     public boolean is_finite() {
-        assert rep_ok();
-// TODO
-        return false;
+        //assert rep_ok();
+        ciclos = new HashSet<>();
+        marcados = new HashSet<>();
+        containsCycles(initial);
+        marcados = new HashSet<>();
+        System.out.println("ciclos hasta el final");
+        return !ciclosHastaElfinal(initial, false);
     }
 
     /**
@@ -174,7 +194,7 @@ public class DFA extends FA {
      * @returns a new DFA accepting the language's complement.
      */
     public DFA complement() {
-        assert rep_ok();
+        //assert rep_ok();
         HashSet<State> finaStates = new HashSet();
         finaStates.addAll(states);
         finaStates.removeAll(final_states);
@@ -188,23 +208,25 @@ public class DFA extends FA {
      * @returns a new DFA accepting the language's complement.
      */
     public DFA star() {
-        assert rep_ok();
-        HashSet<Triple<State, Character, State>> trans =(HashSet<Triple<State, Character, State>>) transitions;
-        HashSet<State> finales = (HashSet<State>)final_states;
-        State inicial= new State("q0i");
+        //assert rep_ok();
+        HashSet<Triple<State, Character, State>> trans = (HashSet<Triple<State, Character, State>>) transitions;
+        HashSet<State> finales = (HashSet<State>) final_states;
+        HashSet<State> estados= (HashSet<State>) states;
+        State inicial = new State("q0i");
+        estados.add(inicial);
         finales.add(inicial);
-        for(char c: alphabet){
-            State to= delta(initial, c);
-            if(to!=null){
-                Triple<State, Character, State> tr= new Triple<>(inicial, c,to);
+        for (char c : alphabet) {
+            State to = delta(initial, c);
+            if (to != null) {
+                Triple<State, Character, State> tr = new Triple<>(inicial, c, to);
                 trans.add(tr);
-                for(State fin: final_states){
-                   Triple<State, Character, State> aux= new Triple<>(fin, c,to);
-                   trans.add(aux);
+                for (State fin : final_states) {
+                    Triple<State, Character, State> aux = new Triple<>(fin, c, to);
+                    trans.add(aux);
                 }
             }
         }
-        return new DFA(states, alphabet, trans, inicial, finales);
+        return new DFA(estados, alphabet, trans, inicial, finales);
     }
 
     // luego de hacer el producto cartesiano quedan Set<Set<State>>, une los nombres de los
@@ -249,12 +271,62 @@ public class DFA extends FA {
      * @returns a new DFA accepting the union of both languages.
      */
     public DFA union(DFA other) {
-        assert rep_ok();
+        /*assert rep_ok();
         assert other.rep_ok();
-        assert alphabet.equals(other.alphabet);
+        assert alphabet.equals(other.alphabet);*/
         boolean existe;
-        if (alphabet.equals(other.alphabet)) {
-            HashSet<State> q = (HashSet) nameUnion(cartesianProduct(0, other.states, states));
+         HashSet<State> q =new HashSet<>(); 
+         HashSet<Triple<State, Character, State>> trans = new HashSet<>();
+         HashSet<Character> alfabeto =(HashSet<Character>)alphabet; 
+         alfabeto.addAll(other.alphabet);
+        for(State s: states){
+            State stateAux= new State(s.name()+"-1");
+            q.add(stateAux);
+        }
+        for(State s: other.states){
+            State stateAux= new State(s.name()+"-2");
+            q.add(stateAux);
+        }
+        for(Triple<State,Character,State> t: transitions){
+           Triple<State,Character,State> transAux= new Triple<>(new State(t.first().name()+"-1"),t.second(),new State(t.third().name()+"-1"));
+            trans.add(transAux);
+        }
+        for(Triple<State,Character,State> t: other.transitions){
+           Triple<State,Character,State> transAux= new Triple<>(new State(t.first().name()+"-2"),t.second(),new State(t.third().name()+"-2"));
+            trans.add(transAux);
+        }
+        State ini= new State("i");
+        q.add(ini);
+        for(Character chara: alphabet){
+            State to= delta(initial, chara);
+            if(to!=null){
+                Triple<State,Character,State> tri= new Triple<>(ini,chara,new State(to.name()+"-1"));
+                trans.add(tri);                
+            }
+        }
+        for(Character chara: other.alphabet){
+            State to= other.delta(other.initial, chara);
+            if(to!=null){
+                Triple<State,Character,State> tri= new Triple<>(ini,chara,new State(to.name()+"-2"));
+                trans.add(tri);
+            }
+        }
+        HashSet<State> finales = new HashSet<>();
+        for(State s: final_states){
+            State stateAux= new State(s.name()+"-1");
+            finales.add(stateAux);
+        }for(State s: other.final_states){
+            State stateAux= new State(s.name()+"-2");
+            finales.add(stateAux);
+        }
+        if(final_states.contains(new State(initial.name()+"-1")) || other.final_states.contains(new State(other.initial.name()+"-2"))){
+            finales.add(ini);
+        }
+        return new NFA(q, alfabeto, trans, ini, finales).toDFA();
+        
+        
+         //(alphabet.equals(other.alphabet) && rep_ok() && other.rep_ok()) {
+           /* HashSet<State> q = (HashSet) nameUnion(cartesianProduct(0, other.states, states));
             HashSet<Triple<State, Character, State>> trans = new HashSet<>();
             HashSet<State> finales = new HashSet<>();
             State inicial = new State("\"" + initial.name() + "," + other.initial.name() + "\"");
@@ -278,20 +350,20 @@ public class DFA extends FA {
                     State s = new State(separar[i].substring(0, separar[i].length() - 1));
                     if (final_states.contains(s) || other.final_states.contains(s)) {
                         existe = true;
-                        String nombre="\"";
+                        String nombre = "\"";
                         for (String separar1 : separar) {
-                            nombre = nombre + separar1.substring(0, separar1.length() - 1)+",";
+                            nombre = nombre + separar1.substring(0, separar1.length() - 1) + ",";
                         }
-                        nombre=nombre.substring(0, nombre.length()-1)+"\"";
-                        finales.add(new State(nombre)); 
+                        nombre = nombre.substring(0, nombre.length() - 1) + "\"";
+                        finales.add(new State(nombre));
                     }
                 }
             }
-
-            return new DFA(q, alphabet, trans, inicial, finales);
-        } else {
-            return null;
-        }
+*/
+          //  return new DFA(q, alphabet, trans, inicial, finales);
+        //} else {
+        //    return null;
+       // }
     }
 
     /**
@@ -303,48 +375,8 @@ public class DFA extends FA {
     public DFA intersection(DFA other) {
         assert rep_ok();
         assert other.rep_ok();
-        boolean existe;
         assert alphabet.equals(other.alphabet);
-        if (alphabet.equals(other.alphabet)) {
-            HashSet<State> q = (HashSet) nameUnion(cartesianProduct(0, other.states, states));
-            HashSet<Triple<State, Character, State>> trans = new HashSet<>();
-            HashSet<State> finales = new HashSet<>();
-            State inicial = new State("\"" + initial.name() + "," + other.initial.name() + "\"");
-            for (State estadosA : states) {
-                for (State estadosB : other.states) {
-                    String estadoUnion = "\"" + estadosA.name() + "," + estadosB.name() + "\"";
-                    for (Character alfab : alphabet) {
-                        Character letra = alfab;
-                        State hastaDFA1 = this.delta(estadosA, letra);
-                        State hastaDFA2 = other.delta(estadosB, letra);
-                        Triple triple = new Triple(new State(estadoUnion), letra, new State("\"" + hastaDFA1.name() + "," + hastaDFA2.name() + "\""));
-                        trans.add(triple);
-                    }
-                }
-            }
-for (State estados : q) {
-                existe = false;
-                String aux = estados.name().replaceAll("\"", "");
-                String[] separar = aux.split(",");
-                for (int i = 0; i < separar.length && !existe; i++) {
-                    State s = new State(separar[i].substring(0, separar[i].length() - 1));
-                    if (final_states.contains(s) && other.final_states.contains(s)) {
-                        existe = true;
-                        String nombre="\"";
-                        for (String separar1 : separar) {
-                            nombre = nombre + separar1.substring(0, separar1.length() - 1)+",";
-                        }
-                        nombre=nombre.substring(0, nombre.length()-1)+"\"";
-                        finales.add(new State(nombre)); 
-                    }
-                }
-            }
-
-
-            return new DFA(q, alphabet, trans, inicial, finales);
-        } else {
-            return null;
-        }
+        return (((this.complement()).union(other.complement())).complement());
     }
 
     @Override
@@ -376,7 +408,7 @@ for (State estados : q) {
     }
 
 // TODO: Check that the transition relation is deterministic.
-    private boolean isDeterministic() {
+    public boolean isDeterministic() {
         Iterator<Triple<State, Character, State>> it = transitions.iterator();
         Iterator<Triple<State, Character, State>> it1 = transitions.iterator();
         Triple<State, Character, State> t1;
@@ -384,9 +416,11 @@ for (State estados : q) {
         boolean aux = true;
         while (it.hasNext() && aux) {
             t = it.next();
+            it1 = transitions.iterator();
             while (it1.hasNext() && aux) {
                 t1 = it1.next();
                 if (((State) (t.first())).equals((State) t1.first()) && !((State) t.third()).equals((State) t1.third()) && (Character) t1.second() == (Character) t.second()) {
+
                     aux = false;
                     return false;
                 }
@@ -418,59 +452,73 @@ for (State estados : q) {
         }
         return temp;
     }
-    
+
     //dfs recursivo
-    HashSet<State> marcados=new HashSet<>();
-	public void dfs_R(State state){
-		if (state != null){
-			System.out.println(state.name()); //tramiento del elemento, mostramos los vertices.Acá debe ir el codigo de el tratamiento que se quiere dar
-			marcados.add(state);
-                        State aux=null;
-                        Iterator<Character> itChar= alphabet.iterator();
-                        while(itChar.hasNext()){
-                           aux= delta(state, itChar.next());
-                           if(aux!=null){
-                           if(!marcados.contains(aux)){
-                               dfs_R(aux);
-                           }
-                           }
-                        }
-			
-			}//end while
-		}//end if
-	
-    /*boolean containsCycle(){
-        HashSet<State> mark= new HashSet<>();
-        for(State s: states){
-            
+    HashSet<State> marcados = new HashSet<>();
+    HashSet<State> ciclos = new HashSet<>();
+
+    public void containsCycles(State state) {
+        if (state != null) {
+            marcados.add(state);
+            State aux = null;
+            Iterator<Character> itChar = alphabet.iterator();
+            while (itChar.hasNext()) {
+                aux = delta(state, itChar.next());
+                if (aux != null) {
+                    if (!marcados.contains(aux)) {
+                        containsCycles(aux);
+                    } else {
+                        ciclos.add(aux);
+                    }
+                }
+            }
+
+        }//end while
+    }//end if
+
+    public boolean ciclosHastaElfinal(State state, boolean cycle) {
+        if (state != null) {
+            marcados.add(state);
+            boolean esCiclo = false;
+            if (ciclos.contains(state)) {
+                esCiclo = true;
+            }
+            State aux = null;
+            Iterator<Character> itChar = alphabet.iterator();
+            while (itChar.hasNext()) {
+                aux = delta(state, itChar.next());
+                if (aux != null) {
+                    if (final_states.contains(aux) && esCiclo) {
+                        System.out.println("CICLO Y LLEGO AL FINAL!");
+                        return true;
+                    }
+                    if (!marcados.contains(aux)) {
+                        return ciclosHastaElfinal(aux, esCiclo);
+                    }
+                }
+            }
         }
+        return cycle;
     }
 
-for each vertex v in g do:
-        if v.mark == WHITE then:
-            if visit(g, v) then:
-            return TRUE;
-fi;
-fi;
-od;
-return FALSE;
+    private boolean llegueFinal(State state, boolean llegue){
+        if (state != null) {
+            marcados.add(state);
+            State aux = null;
+            Iterator<Character> itChar = alphabet.iterator();
+            while (itChar.hasNext()) {
+                aux = delta(state, itChar.next());
+                if (aux != null) {
+                    if (final_states.contains(aux)) {
+                        return true;
+                    }
+                    if (!marcados.contains(aux)) {
+                        containsCycles(aux);
+                    } 
+                }
+            }
 
-    HashSet<State> gris=new HashSet<>();
-
-private boolean visit(State v){
-    gris.add(v);
-}
-
-for each edge (v, u) in g do:
-if u.mark == GREY then:
-return TRUE;
-else if u.mark == WHITE then:
-if visit(g, u) then:
-return TRUE;
-fi;
-fi;
-od;
-v.mark = BLACK;
-return FALSE;
-*/
+        }//end while
+        return llegue;
+    }
 }

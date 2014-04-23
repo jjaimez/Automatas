@@ -10,7 +10,7 @@ import utils.Triple;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         HashSet<State> hashStates = new HashSet<>();
         HashSet<State> hashFinales = new HashSet<>();
         HashSet<Triple<State, Character, State>> hashTrans = new HashSet<>();
@@ -39,6 +39,25 @@ public class Main {
         DFA dfa = nfa.toDFA();
         System.out.println(dfa.to_dot());
 
+        
+         FA fa = FA.parse_form_file("/home/nico/Escritorio/autoa");
+         DFA dfa1 = (DFA) fa;
+         DFA union= dfa1.union(dfa1);
+         System.out.print(union.to_dot());
+         union.writeDotSourceToFile(union.to_dot(),"/home/nico/Escritorio/union.dot" );
+         String fileOutputPath1 = "/home/nico/Escritorio/union";
+            String tParam = "-Tjpg";
+            String tOParam = "-o";
+            String[] cmd = new String[5];
+            cmd[0] = "dot";
+            cmd[1] = tParam;
+            cmd[2] = "/home/nico/Escritorio/union.dot";
+            cmd[3] = tOParam;
+            cmd[4] = fileOutputPath1;
+
+            Runtime rt = Runtime.getRuntime();
+            rt.exec(cmd);
+            
 
 //        try {
 //            FA fa = FA.parse_form_file("/home/nico/Escritorio/autoa");
