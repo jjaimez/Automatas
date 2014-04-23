@@ -1,11 +1,9 @@
 package automata;
 
 import static automata.FA.Lambda;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import utils.Triple;
@@ -23,16 +21,16 @@ public class NFA extends FA {
         this.transitions = transitions;
         this.initial = initial;
         this.final_states = final_states;
-        if(!this.states.containsAll(this.final_states)){
-           throw new java.lang.IllegalArgumentException("Los estados finales no estan incluidos en los estados");  
+        if (!this.states.containsAll(this.final_states)) {
+            throw new java.lang.IllegalArgumentException("Los estados finales no estan incluidos en los estados");
         }
-        if(!transitionsAreCorrect()){
+        if (!transitionsAreCorrect()) {
             throw new java.lang.IllegalArgumentException("Las transiciones son incorrectas");
         }
-        if(!states.contains(initial)){
+        if (!states.contains(initial)) {
             throw new java.lang.IllegalArgumentException("El estado innicial no pertenece a los estados");
         }
-        
+
     }
 
     /*
@@ -95,18 +93,18 @@ public class NFA extends FA {
         ret.append("digraph {\n");
         ret.append("inic[shape=point]; \n");
         ret.append("inic->");
-        ret.append("\""+initial.name()+"\"");
+        ret.append("\"" + initial.name() + "\"");
         ret.append(";\n");
         for (Triple tr : transitions) {
-            ret.append("\""+((State) tr.first()).name()+"\""); //desde
+            ret.append("\"" + ((State) tr.first()).name() + "\""); //desde
             ret.append("->");
-            ret.append("\""+((State) tr.third()).name()+"\""); //hasta
+            ret.append("\"" + ((State) tr.third()).name() + "\""); //hasta
             String aux = " [label=\"" + tr.second() + "\"];\n";
             ret.append(aux);
         }
 
         for (State s : final_states) {
-            ret.append("\""+s.name()+"\"");
+            ret.append("\"" + s.name() + "\"");
             ret.append("[shape=doublecircle];\n");
         }
         ret.append("}");
@@ -118,11 +116,11 @@ public class NFA extends FA {
      */
     @Override
     public boolean accepts(String string) {
-        boolean repOk = rep_ok();
-        boolean distNul = string != null;
-        boolean verify = verify_string(string);
-
-        return false;
+        assert rep_ok();
+        assert string != null;
+        assert verify_string(string);
+        DFA dfa = this.toDFA();
+        return dfa.accepts(string);
     }
 
     public static State nameUnion(Set<State> set) {
@@ -148,24 +146,6 @@ public class NFA extends FA {
         }
     }
 
-//    public Set<Set<State>> subconjuntos(Set<State> originalSet) {
-//        Set<Set<State>> sets = new HashSet<Set<State>>();
-//        if (originalSet.isEmpty()) {
-//            sets.add(new HashSet<State>());
-//            return sets;
-//        }
-//        List<State> list = new ArrayList<State>(originalSet);
-//        State head = list.get(0);
-//        Set<State> rest = new HashSet<State>(list.subList(1, list.size()));
-//        for (Set<State> set : subconjuntos(rest)) {
-//            Set<State> newSet = new HashSet<State>();
-//            newSet.add(head);
-//            newSet.addAll(set);
-//            sets.add(newSet);
-//            sets.add(set);
-//        }
-//        return sets;
-//    }
     /**
      * Converts the automaton to a DFA.
      *
@@ -220,8 +200,8 @@ public class NFA extends FA {
                         }
                     }
                 } else {
-                    if (final_states.contains(estados)){
-                    newFinals.add(estados);
+                    if (final_states.contains(estados)) {
+                        newFinals.add(estados);
                     }
                 }
             }
