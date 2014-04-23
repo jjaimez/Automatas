@@ -28,11 +28,11 @@ public class DFAAutomataMethodsTests {
 		assertFalse(dfa.complement().accepts("abbb"));
 	}
 	
-	/*@Test
+	@Test
 	public void test4() throws Exception {
 		DFA dfa = (DFA) FA.parse_form_file("test/dfa1");
 		assertTrue(dfa.complement().accepts("ababb")); 
-	}*/ //ESTE TEST ES INCORRECTO
+	}
 	
 	// Tests for DFA2
 	
