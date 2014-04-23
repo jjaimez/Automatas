@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import utils.Triple;
@@ -14,8 +12,6 @@ import utils.Triple;
 /* Implements a DFA (Deterministic Finite Atomaton).
  */
 public class DFA extends FA {
-
-    private boolean isDeterministic;
 
     public DFA() {
         this.states = null;
@@ -48,9 +44,6 @@ public class DFA extends FA {
         if(!isDeterministic()){
             throw new java.lang.IllegalArgumentException("No es deterministico");
         }
-        
-
-
     }
 
     /*
@@ -81,8 +74,8 @@ public class DFA extends FA {
 
     @Override
     public State delta(State from, Character c) {
-        //assert states().contains(from);
-        //assert alphabet().contains(c);
+        assert states().contains(from);
+        assert alphabet().contains(c);
         for (Triple t : transitions) {
             if (((State) t.first()).equals(from) && ((Character) t.second()).equals(c)) {
                 return (State) t.third();
@@ -93,7 +86,7 @@ public class DFA extends FA {
 
     @Override
     public String to_dot() {
-        //assert rep_ok();
+       assert rep_ok();
        StringBuilder ret = new StringBuilder();
         ret.append("digraph {\n");
         ret.append("inic[shape=point]; \n");
@@ -107,7 +100,6 @@ public class DFA extends FA {
             String aux = " [label=\"" + tr.second() + "\"];\n";
             ret.append(aux);
         }
-
         for (State s : final_states) {
             ret.append("\""+s.name()+"\"");
             ret.append("[shape=doublecircle];\n");
@@ -121,13 +113,9 @@ public class DFA extends FA {
      */
     @Override
     public boolean accepts(String string) {
-        boolean repOk = rep_ok();
-        boolean distNul = string != null;
-        boolean verify = verify_string(string);
-
-        //assert repOk;
-        //assert distNul;
-        //assert verify;
+        assert rep_ok();
+        assert string!=null;
+        assert verify_string(string);
         char[] carac = string.toCharArray();
         State avanzo = initial;
         for (int i = 0; i < carac.length; i++) {
@@ -137,7 +125,7 @@ public class DFA extends FA {
             }
         }
         boolean ret = final_states.contains(avanzo);
-        return repOk && distNul && verify && ret;
+        return ret;
 
     }
 
@@ -147,7 +135,7 @@ public class DFA extends FA {
      * @return NFA recognizing the same language.
      */
     public NFA toNFA() {
-        //assert rep_ok();
+        assert rep_ok();
         return new NFA(states, alphabet, transitions, initial, final_states);
     }
 
@@ -157,7 +145,7 @@ public class DFA extends FA {
      * @return NFALambda recognizing the same language.
      */
     public NFALambda toNFALambda() {
-        //assert rep_ok();
+        assert rep_ok();
 // TODO
         return new NFALambda(states, alphabet, transitions, initial, final_states);
     }
@@ -168,7 +156,7 @@ public class DFA extends FA {
      * @returns True iff the automaton's language is empty.
      */
     public boolean is_empty() {
-        //assert rep_ok();
+        assert rep_ok();
         ciclos = new HashSet<>();
         return !llegueFinal(initial, false);
     }
@@ -179,12 +167,11 @@ public class DFA extends FA {
      * @returns True iff the automaton's language is finite.
      */
     public boolean is_finite() {
-        //assert rep_ok();
+        assert rep_ok();
         ciclos = new HashSet<>();
         marcados = new HashSet<>();
         containsCycles(initial);
         marcados = new HashSet<>();
-        System.out.println("ciclos hasta el final");
         return !ciclosHastaElfinal(initial, false);
     }
 
@@ -194,11 +181,12 @@ public class DFA extends FA {
      * @returns a new DFA accepting the language's complement.
      */
     public DFA complement() {
-        //assert rep_ok();
+        assert rep_ok();
         HashSet<State> finaStates = new HashSet();
-        finaStates.addAll(states);
-        finaStates.removeAll(final_states);
-        DFA complemento = new DFA(states, alphabet, transitions, initial, finaStates);
+        DFA dfaCompleto=this.completarDelta();
+        finaStates.addAll(dfaCompleto.states);
+        finaStates.removeAll(dfaCompleto.final_states);
+        DFA complemento = new DFA(dfaCompleto.states, dfaCompleto.alphabet, dfaCompleto.transitions, dfaCompleto.initial, finaStates);
         return complemento;
     }
 
@@ -208,7 +196,7 @@ public class DFA extends FA {
      * @returns a new DFA accepting the language's complement.
      */
     public DFA star() {
-        //assert rep_ok();
+        assert rep_ok();
         HashSet<Triple<State, Character, State>> trans = (HashSet<Triple<State, Character, State>>) transitions;
         HashSet<State> finales = (HashSet<State>) final_states;
         HashSet<State> estados= (HashSet<State>) states;
@@ -229,41 +217,6 @@ public class DFA extends FA {
         return new DFA(estados, alphabet, trans, inicial, finales);
     }
 
-    // luego de hacer el producto cartesiano quedan Set<Set<State>>, une los nombres de los
-    //estados que estan dentro de los sets y deja un Set<State>
-    public static Set<State> nameUnion(Set<Set<State>> setSet) {
-        Iterator<Set<State>> it = setSet.iterator();
-        Set<State> s = new HashSet();
-        String concate = "";
-        while (it.hasNext()) {
-            Iterator<State> it2 = it.next().iterator();
-            LinkedList<State> list = new LinkedList<State>();
-            while (it2.hasNext()) {
-                list.add(it2.next());
-            }
-
-            State s2 = new State("\"" + list.get(1).name() + "," + list.get(0).name() + "\"");
-            s.add(s2);
-        }
-        return s;
-    }
-
-    //realiza el producto carteciano entre conjuntos
-    private static Set<Set<State>> cartesianProduct(int index, Set<State>... sets) {
-        Set<Set<State>> ret = new HashSet<Set<State>>();
-        if (index == sets.length) {
-            ret.add(new HashSet<State>());
-        } else {
-            for (Object obj : sets[index]) {
-                for (Set<State> set : cartesianProduct(index + 1, sets)) {
-                    set.add(new State(((State) obj).name() + index));
-                    ret.add(set);
-                }
-            }
-        }
-        return ret;
-    }
-
     /**
      * Returns a new automaton which recognizes the union of both languages, the
      * one accepted by 'this' and the one represented by 'other'.
@@ -271,10 +224,8 @@ public class DFA extends FA {
      * @returns a new DFA accepting the union of both languages.
      */
     public DFA union(DFA other) {
-        /*assert rep_ok();
+        assert rep_ok();
         assert other.rep_ok();
-        assert alphabet.equals(other.alphabet);*/
-        boolean existe;
          HashSet<State> q =new HashSet<>(); 
          HashSet<Triple<State, Character, State>> trans = new HashSet<>();
          HashSet<Character> alfabeto =(HashSet<Character>)alphabet; 
@@ -323,47 +274,6 @@ public class DFA extends FA {
             finales.add(ini);
         }
         return new NFA(q, alfabeto, trans, ini, finales).toDFA();
-        
-        
-         //(alphabet.equals(other.alphabet) && rep_ok() && other.rep_ok()) {
-           /* HashSet<State> q = (HashSet) nameUnion(cartesianProduct(0, other.states, states));
-            HashSet<Triple<State, Character, State>> trans = new HashSet<>();
-            HashSet<State> finales = new HashSet<>();
-            State inicial = new State("\"" + initial.name() + "," + other.initial.name() + "\"");
-            for (State estadosA : states) {
-                for (State estadosB : other.states) {
-                    String estadoUnion = "\"" + estadosA.name() + "," + estadosB.name() + "\"";
-                    for (Character alfab : alphabet) {
-                        Character letra = alfab;
-                        State hastaDFA1 = this.delta(estadosA, letra);
-                        State hastaDFA2 = other.delta(estadosB, letra);
-                        Triple triple = new Triple(new State(estadoUnion), letra, new State("\"" + hastaDFA1.name() + "," + hastaDFA2.name() + "\""));
-                        trans.add(triple);
-                    }
-                }
-            }
-            for (State estados : q) {
-                existe = false;
-                String aux = estados.name().replaceAll("\"", "");
-                String[] separar = aux.split(",");
-                for (int i = 0; i < separar.length && !existe; i++) {
-                    State s = new State(separar[i].substring(0, separar[i].length() - 1));
-                    if (final_states.contains(s) || other.final_states.contains(s)) {
-                        existe = true;
-                        String nombre = "\"";
-                        for (String separar1 : separar) {
-                            nombre = nombre + separar1.substring(0, separar1.length() - 1) + ",";
-                        }
-                        nombre = nombre.substring(0, nombre.length() - 1) + "\"";
-                        finales.add(new State(nombre));
-                    }
-                }
-            }
-*/
-          //  return new DFA(q, alphabet, trans, inicial, finales);
-        //} else {
-        //    return null;
-       // }
     }
 
     /**
@@ -387,7 +297,6 @@ public class DFA extends FA {
             if (!states.contains(it.next())) {
                 return false;
             }
-
         }
         return ret;
         // TODO: Check that the alphabet does not contains lambda.
@@ -489,7 +398,6 @@ public class DFA extends FA {
                 aux = delta(state, itChar.next());
                 if (aux != null) {
                     if (final_states.contains(aux) && esCiclo) {
-                        System.out.println("CICLO Y LLEGO AL FINAL!");
                         return true;
                     }
                     if (!marcados.contains(aux)) {
@@ -520,5 +428,22 @@ public class DFA extends FA {
 
         }//end while
         return llegue;
+    }
+    
+    private DFA completarDelta(){
+        State trampa= new State("trampa");
+        HashSet<State> estados= (HashSet<State>)states;
+        estados.add(trampa);
+        HashSet<Triple<State,Character,State>> trans= (HashSet<Triple<State, Character, State>>)transitions;
+        for(State s: estados){
+            for(Character c: alphabet){
+                State aux= delta(s, c);
+                if(aux==null){
+                    Triple<State,Character,State> add= new Triple<>(s,c,trampa);
+                    trans.add(add);
+                }
+            }
+        }
+        return (new DFA(estados, alphabet, trans, initial, final_states));
     }
 }
