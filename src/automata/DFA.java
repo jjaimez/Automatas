@@ -388,13 +388,14 @@ public class DFA extends FA {
     public boolean ciclosHastaElfinal(State state, boolean cycle) {
         if (state != null) {
             marcados.add(state);
-            boolean esCiclo = false;
+            boolean esCiclo = cycle; //el error consitía en que no almacenaba el valor anterior de si
+            //poseía un ciclo o no, un ejemplo que antes no pasaba está al final del metodo y ahora si lo pasa
             if (ciclos.contains(state)) {
                 esCiclo = true;
             }
             State aux = null;
             Iterator<Character> itChar = alphabet.iterator();
-            while (itChar.hasNext()) {
+            while (itChar.hasNext() && !cycle) {
                 aux = delta(state, itChar.next());
                 if (aux != null) {
                     if (final_states.contains(aux) && esCiclo) {
@@ -408,6 +409,23 @@ public class DFA extends FA {
         }
         return cycle;
     }
+    
+    
+    /*
+    Ejemplo que antes NO pasaba el test y ahora si
+    digraph {
+	inic[shape=point];
+    inic->q0;
+    q0->q1 [label="a"];
+    q1->q2 [label="a"];
+    q2->q1 [label="b"];
+    q1->q3 [label="b"];
+    q3->q4 [label="b"];
+    q2->q4[label="c"];
+    q4[shape=doublecircle];
+    q1[shape=doublecircle];
+    }
+    */
 
     private boolean llegueFinal(State state, boolean llegue){
         if (state != null) {
