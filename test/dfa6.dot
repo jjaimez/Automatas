@@ -1,0 +1,13 @@
+digraph {
+	inic[shape=point];
+    inic->w0;
+    w0->w1 [label="b"];
+    w1->w1 [label="b"];
+    w0->w2 [label="a"];
+    w1->w2 [label="a"];
+    w2->w0 [label="b"];
+    w2->w2 [label="a"];
+    
+    w0[shape=doublecircle];
+    w1[shape=doublecircle];
+}

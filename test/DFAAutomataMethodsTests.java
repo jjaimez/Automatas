@@ -131,5 +131,75 @@ public class DFAAutomataMethodsTests {
 		DFA dfa = (DFA) FA.parse_form_file("test/dfa4");
 		assertFalse(dfa.star().is_finite());
 	}
+        
+        	@Test
+	public void test20() throws Exception {
+		DFA dfa = (DFA) FA.parse_form_file("test/dfa1");
+                DFA dfa2 = (DFA) FA.parse_form_file("test/dfa1");
+		assertTrue(dfa.lenguajesIguales(dfa2));
+	}
+        
+               	@Test
+	public void test21() throws Exception {
+		DFA dfa = (DFA) FA.parse_form_file("test/dfa2");
+                DFA dfa2 = (DFA) FA.parse_form_file("test/dfa2");
+		assertTrue(dfa.lenguajesIguales(dfa2));
+	}
+        
+               	@Test
+	public void test22() throws Exception {
+		DFA dfa = (DFA) FA.parse_form_file("test/dfa3");
+                DFA dfa2 = (DFA) FA.parse_form_file("test/dfa3");
+		assertTrue(dfa.lenguajesIguales(dfa2));
+	}
+        
+               	@Test
+	public void test23() throws Exception {
+		DFA dfa = (DFA) FA.parse_form_file("test/dfa4");
+                DFA dfa2 = (DFA) FA.parse_form_file("test/dfa4");
+		assertTrue(dfa.lenguajesIguales(dfa2));
+	}
 	
+       @Test
+	public void test24() throws Exception {
+		DFA dfa = (DFA) FA.parse_form_file("test/dfa1");
+                DFA dfa2 = (DFA) FA.parse_form_file("test/dfa2");
+		assertFalse(dfa.lenguajesIguales(dfa2));
+	} 
+        
+         @Test
+	public void test25() throws Exception {
+		DFA dfa = (DFA) FA.parse_form_file("test/dfa3");
+                DFA dfa2 = (DFA) FA.parse_form_file("test/dfa4");
+		assertFalse(dfa.lenguajesIguales(dfa2));
+	} 
+        
+        @Test
+        public void test26() throws Exception{
+                DFA dfa = (DFA) FA.parse_form_file("test/dfa4");
+                DFA dfamin = dfa.minimize();
+                assertTrue(dfa.lenguajesIguales(dfamin));
+        }
+        
+        @Test
+        public void test27() throws Exception{
+                DFA dfa = (DFA) FA.parse_form_file("test/dfa5");
+                DFA dfa2 = (DFA) FA.parse_form_file("test/dfa6");
+                assertTrue(dfa.lenguajesIguales(dfa2));
+                assertTrue(dfa.accepts("abbab"));
+                assertTrue(dfa2.accepts("abbab"));
+                assertFalse(dfa.accepts("ababa"));
+                assertFalse(dfa2.accepts("ababa"));
+        }
+        
+        @Test
+        public void test28() throws Exception{
+                DFA dfa = (DFA) FA.parse_form_file("test/dfa7");
+                DFA dfa2 = (DFA) FA.parse_form_file("test/dfa6");
+                DFA dfa3 = (DFA) FA.parse_form_file("test/dfa3");
+                assertFalse(dfa.lenguajesIguales(dfa2));
+                assertFalse(dfa2.lenguajesIguales(dfa3));
+                DFA dfamin = dfa.minimize();
+                assertTrue(dfa.lenguajesIguales(dfamin));                
+        }
 }

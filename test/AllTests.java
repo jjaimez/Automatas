@@ -8,7 +8,8 @@ import org.junit.runners.Suite.SuiteClasses;
 		DFAStateQueryingTests.class, IntegrationTests.class,
 		NFAAutomataMethodsTests.class, NFACreationTests.class,
 		NFALambdaAutomataMethodsTests.class, NFALambdaCreationTests.class,
-		NFALambdaStateQueryingTests.class, NFAStateQueryingTests.class })
+		NFALambdaStateQueryingTests.class, NFAStateQueryingTests.class,PDAStateQueryingTests.class,
+PDAAutomataMethodsTests.class})
 public class AllTests {
 
 }

@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Set;
 
 import utils.Triple;
@@ -74,7 +75,7 @@ public class DFA extends FA {
 
     @Override
     public State delta(State from, Character c) {
-        assert states().contains(from);
+       // assert states().contains(from);
         assert alphabet().contains(c);
         for (Triple t : transitions) {
             if (((State) t.first()).equals(from) && ((Character) t.second()).equals(c)) {
@@ -427,7 +428,314 @@ public class DFA extends FA {
     }
     */
 
-    private boolean llegueFinal(State state, boolean llegue){
+   
+    
+    private DFA completarDelta(){
+        State trampa= new State("trampa");
+        HashSet<State> estados= (HashSet<State>)states;
+        estados.add(trampa);
+        HashSet<Triple<State,Character,State>> trans= (HashSet<Triple<State, Character, State>>)transitions;
+        for(State s: estados){
+            for(Character c: alphabet){
+                State aux= delta(s, c);
+                if(aux==null){
+                    Triple<State,Character,State> add= new Triple<>(s,c,trampa);
+                    trans.add(add);
+                }
+            }
+        }
+        return (new DFA(estados, alphabet, trans, initial, final_states));
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+        private int buscarIndiceY(State s, String[][] matriz, int utilizados) {
+        int i = 1;
+        while (i < utilizados) {
+            if (s.name().equals(matriz[utilizados - 1][i])) {
+                return i;
+            }
+            i++;
+        }
+        return 0;
+    }
+
+    private int buscarIndiceX(State s, String[][] matriz, int utilizados) {
+        int i = 0;
+        while (i < utilizados - 1) {
+            if (s.name().equals(matriz[i][0])) {
+                return i;
+            }
+            i++;
+        }
+        return utilizados - 1;
+    }
+
+    public static State nameUnion(Set<State> set) {
+        if ((set.isEmpty())) {
+            return null;
+        } else {
+            Iterator<State> it = set.iterator();
+            if (set.size() == 1) {
+                return it.next();
+            } else {
+                String concate = "";
+                while (it.hasNext()) {
+                    State s2 = it.next();
+                    if (it.hasNext()) {
+                        concate += (s2.name() + ",");
+                    } else {
+                        concate += (s2.name());
+                    }
+                }
+                State s = new State(concate);
+                return s;
+            }
+        }
+    }
+
+    public State perteneceA(Set<Set<State>> equivalencias, State state) {
+        for (Set<State> s : equivalencias) {
+            if (s.contains(state)) {
+                return nameUnion(s);
+            }
+        }
+        return null;
+    }
+
+    public Set<State> perteneceAFinal(Set<Set<State>> equivalencias, Set<State> statesFinales) {
+        Set<State> finalStates = new HashSet();
+        for (Set<State> s : equivalencias) {
+            for (State s2 : statesFinales) {
+                if (s.contains(s2)) {
+                    finalStates.add(nameUnion(s));
+                }
+            }
+        }
+        return finalStates;
+    }
+
+    public DFA minimize() {
+        LinkedList<State> reachableStates = new LinkedList();
+        Set<State> utilizados = new HashSet();
+        Set transUtilizadas = new HashSet();
+        reachableStates.add(initial);
+        while (!reachableStates.isEmpty()) { //elimino los estados inalcanzables
+            State s = reachableStates.pop();
+            utilizados.add(s);
+            for (Character c : alphabet) {
+                if (delta(s, c) != null) {
+                    transUtilizadas.add(new Triple(s, c, delta(s, c)));
+                    if (!utilizados.contains(delta(s, c))) {
+                        reachableStates.add(delta(s, c));
+                    }
+                }
+            }
+        }
+        Set finales = new HashSet();
+        for (State s1 : utilizados) {
+            if (final_states.contains(s1)) {
+                finales.add(s1);
+            }
+        }
+        int tamanhoMatriz = utilizados.size() + 1;
+       // System.out.println("TAMAÑO DE LA MATRIZ UTILIZADOS: " + tamanhoMatriz);
+        String[][] matriz = new String[tamanhoMatriz][tamanhoMatriz];
+        Iterator it = utilizados.iterator();
+        int i = 0;
+        int j = 1;
+        for (i = 0; i < tamanhoMatriz - 1; i++) { //inicializo la matriz para minimizar
+            State estado = (State) it.next();
+            matriz[i][0] = estado.name();
+            matriz[tamanhoMatriz - 1][i + 1] = estado.name();
+            matriz[i][i + 1] = "X";
+        }
+        matriz[0][tamanhoMatriz - 1] = "X";
+        for (i = 0; i < tamanhoMatriz - 1; i++) {
+            for (j = 1; j < tamanhoMatriz; j++) {
+                if (!matriz[i][0].equals(matriz[tamanhoMatriz - 1][j])) {
+                    State s1 = new State(matriz[i][0]);
+                    State s2 = new State(matriz[tamanhoMatriz - 1][j]);
+                    if ((finales.contains(s1) && !finales.contains(s2)) || (!finales.contains(s1) && finales.contains(s2))) {
+                        matriz[i][j] = "X";
+                    }
+                }
+            }
+        }
+        //HASTA ACA PERFECTO
+        for (i = 0; i < tamanhoMatriz - 1; i++) {
+            for (j = 1; j < tamanhoMatriz; j++) {
+                if (!matriz[i][0].equals(matriz[tamanhoMatriz - 1][j])) {
+                    State s1 = new State(matriz[i][0]);
+                    State s2 = new State(matriz[tamanhoMatriz - 1][j]);
+                    for (Character c : alphabet) {
+                        if ((delta(s1, c) != null) && (delta(s2, c) != null)) {
+                            if ((finales.contains(delta(s1, c)) && !finales.contains(delta(s2, c))) || (!finales.contains(delta(s1, c)) && finales.contains(delta(s2, c)))) {
+                                matriz[i][j] = "X";
+                            }
+                        } else {
+                            if ((delta(s1, c) == null) || (delta(s2, c) == null)) {
+                                matriz[i][j] = "X";
+                            }
+                        }
+                    }
+                }
+            }
+        }
+      //  System.out.println("TERMINE LA INICIALIZACION");
+//        for (i = 0; i < tamanhoMatriz; i++) {
+//            for (j = 0; j < tamanhoMatriz; j++) {
+//                System.out.println("MATRIZ[" + i + "][" + j + "] TIENE EL VALOR: " + matriz[i][j]);
+//            }
+//        }
+        boolean cambio = true;
+        while (cambio) { // caso inductivo de la minimizacion
+            cambio = false;
+            for (i = 0; i < tamanhoMatriz - 1; i++) {
+                for (j = 1; j < tamanhoMatriz; j++) {
+                    if ((!matriz[i][0].equals(matriz[tamanhoMatriz - 1][j])) && (!(matriz[i][j] != null))) {
+                        State s1 = new State(matriz[i][0]);
+                        State s2 = new State(matriz[tamanhoMatriz - 1][j]);
+                        for (Character c : alphabet) {
+                            if ((delta(s1, c) != null) && (delta(s2, c) != null)) {
+                                if ((matriz[buscarIndiceX(delta(s1, c), matriz, tamanhoMatriz)][buscarIndiceY(delta(s2, c), matriz, tamanhoMatriz)] != null) || (matriz[buscarIndiceX(delta(s2, c), matriz, tamanhoMatriz)][buscarIndiceY(delta(s1, c), matriz, tamanhoMatriz)] != null )) {
+                                    if (!(matriz[buscarIndiceX(s1, matriz, tamanhoMatriz)][buscarIndiceY(s2, matriz, tamanhoMatriz)] != null)) {
+                                        matriz[buscarIndiceX(s1, matriz, tamanhoMatriz)][buscarIndiceY(s2, matriz, tamanhoMatriz)] = "X";
+                                        cambio = true;
+                                    }
+                                    if (!(matriz[buscarIndiceX(s2, matriz, tamanhoMatriz)][buscarIndiceY(s1, matriz, tamanhoMatriz)] != null)) {
+                                        matriz[buscarIndiceX(s2, matriz, tamanhoMatriz)][buscarIndiceY(s1, matriz, tamanhoMatriz)] = "X";
+                                        cambio = true;
+                                    }
+                                }
+                            } else {
+                                if ((delta(s1, c) == null) || (delta(s2, c) == null)) {
+                                    matriz[i][j] = "X";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for (i = 0; i < tamanhoMatriz; i++) {
+            for (j = 0; j < tamanhoMatriz; j++) {
+             //   System.out.println("MATRIZ[" + i + "][" + j + "] TIENE EL VALOR: " + matriz[i][j]);
+            }
+        }
+
+     //   System.out.println("TERMINE LA INDUCCION");
+        Set<Set<State>> equivalencias = new HashSet();
+        for (i = 0; i < tamanhoMatriz - 2; i++) { // obtengo las clases de equivalencia
+            for (j = 1; j < tamanhoMatriz - 1; j++) {
+                if (matriz[i][j] == null) {
+                    State s1 = new State(matriz[i][0]);
+                    State s2 = new State(matriz[tamanhoMatriz - 1][j]);
+                    Set<State> s = new HashSet();
+                    s.add(s1);
+                    s.add(s2);
+                    equivalencias.add(s);
+                }
+            }
+        }
+        for (State s : utilizados) {
+            boolean sinEquiv = true;
+            for (Set<State> set : equivalencias) {
+                if (set.contains(s)) {
+                    sinEquiv = false;
+                }
+            }
+            if (sinEquiv) {
+                Set<State> setS = new HashSet();
+                setS.add(s);
+                equivalencias.add(setS);
+            }
+        }
+       // System.out.println("TERMINE LA EQUIVALENCIA");
+        if (equivalencias.isEmpty()) { // si no hay clses de equivalencia devuelvo el DFA sin estados inalcanzables
+            return new DFA(utilizados, this.alphabet, transUtilizadas, this.initial, finales);
+        } else {
+            Set<Triple<State, Character, State>> t = new HashSet();
+            Set<State> sNameUnion = new HashSet();
+            for (Set<State> state : equivalencias) {
+                sNameUnion.add(nameUnion(state));
+            }
+            for (State s1 : sNameUnion) {
+                if (s1 != null) {
+                    if (s1.containsComma()) {
+                        String[] separar = s1.name().split(",");
+                        State s = new State(separar[0].substring(0, separar[0].length()));
+                        for (Character c : alphabet) {
+                            if (delta(s, c) != null) {
+                                Triple<State, Character, State> triplete = new Triple<State, Character, State>(s1, c, perteneceA(equivalencias, delta(s, c)));
+                                t.add(triplete);
+                            }
+                        }
+                    } else {
+                        for (Character c : alphabet) {
+                            if (delta(s1, c) != null) {
+                                Triple<State, Character, State> triplete = new Triple<State, Character, State>(s1, c, perteneceA(equivalencias, delta(s1, c)));
+                                t.add(triplete);
+                            }
+                        }
+                    }
+                }
+            }
+            State newInitial = perteneceA(equivalencias, this.initial);
+            Set<State> newFinalStates = perteneceAFinal(equivalencias, this.final_states);
+            return new DFA(sNameUnion, this.alphabet, t, newInitial, newFinalStates);
+        }
+    }
+    
+    
+    public boolean lenguajesIguales( DFA l2){
+        DFA dfa1=this.minimize();
+        DFA dfa2= l2.minimize();
+        LinkedList<State> transDfa1= new LinkedList<>();
+        LinkedList<State> transDfa2= new LinkedList<>();
+        State s1;
+        State s2;
+        HashSet<State> yaPase1= new HashSet<>();
+         HashSet<State> yaPase2= new HashSet<>();
+        if( dfa1.alphabet.containsAll(dfa2.alphabet) && dfa2.alphabet.containsAll(dfa1.alphabet) && dfa1.final_states().containsAll(dfa2.final_states())&&  dfa2.final_states().containsAll(dfa1.final_states())){
+       transDfa1.add(dfa1.initial);
+       transDfa2.add(dfa2.initial);
+       while(!transDfa1.isEmpty() && !transDfa2.isEmpty()){
+           s1= transDfa1.removeFirst();
+           yaPase1.add(s1);
+           s2= transDfa2.removeFirst();
+            yaPase2.add(s2);
+        for(Character c: alphabet){
+             s1= dfa1.delta(s1, c);
+             s2= dfa2.delta(s2, c);
+             if(!yaPase1.contains(s1)&& !yaPase2.contains(s2)){
+            if(s1 !=null && s2!=null){
+             transDfa1.addLast(s1);
+             transDfa2.addLast(s2);
+            }
+            else{
+                if(s1!=null || s2!=null)
+                    return false;
+            }
+             }
+        }
+       }
+       if(!transDfa1.isEmpty() || !transDfa2.isEmpty()){
+           return false;
+       }
+        }
+        else
+            return false;
+        return true;
+        
+    }
+    
+     private boolean llegueFinal(State state, boolean llegue){
         if (state != null) {
             marcados.add(state);
             State aux = null;
@@ -446,22 +754,5 @@ public class DFA extends FA {
 
         }//end while
         return llegue;
-    }
-    
-    private DFA completarDelta(){
-        State trampa= new State("trampa");
-        HashSet<State> estados= (HashSet<State>)states;
-        estados.add(trampa);
-        HashSet<Triple<State,Character,State>> trans= (HashSet<Triple<State, Character, State>>)transitions;
-        for(State s: estados){
-            for(Character c: alphabet){
-                State aux= delta(s, c);
-                if(aux==null){
-                    Triple<State,Character,State> add= new Triple<>(s,c,trampa);
-                    trans.add(add);
-                }
-            }
-        }
-        return (new DFA(estados, alphabet, trans, initial, final_states));
     }
 }

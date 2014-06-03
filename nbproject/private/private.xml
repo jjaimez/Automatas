@@ -4,7 +4,9 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/home/nico/Automatas/Automatas/src/automata/DFA.java</file>
+            <file>file:/home/nico/Automatas/Automatas/src/Main.java</file>
             <file>file:/home/nico/Automatas/Automatas/test/DFAAutomataMethodsTests.java</file>
+            <file>file:/home/nico/Automatas/Automatas/src/automata/PDA.java</file>
         </group>
     </open-files>
 </project-private>
