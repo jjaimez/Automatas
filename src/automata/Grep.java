@@ -1,65 +1,66 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package automata;
 
-import static automata.FA.Lambda;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.HashSet;
-import java.util.Iterator;
+import utils.Pair;
 import utils.Triple;
 
-/**
- *
- * @author jacinto
- */
 public class Grep {
 
     public void find(String path) throws Exception {
         FileReader in = null;
-        boolean afnd = false;
-
-        HashSet<State> hashStates = new HashSet<>();
-        HashSet<Triple<State, Character, State>> hashTrans = new HashSet<>();
-        HashSet<Character> hashAl = new HashSet<>();
-        HashSet<State> hashFinal = new HashSet<>();
-        State inicio = null;
-
-        Tipo tipo = Tipo.DFA;
+        HashSet<Triple<Integer, Integer, Integer>> donde = new HashSet();
+        DFA dfa = (DFA) FA.parse_form_file("test/dfa1"); //cambiar esto !!!!
         StringBuilder sb = new StringBuilder();
-
+        boolean estabaAceptando;
+        int aux = -1;
         try {
-            FileInputStream fis = new FileInputStream(new java.io.File(path).getAbsoluteFile() + ".dot");
+            FileInputStream fis = new FileInputStream(new java.io.File(path).getAbsoluteFile() + ".txt");
             DataInputStream dis = new DataInputStream(fis);
             BufferedReader br = new BufferedReader(new InputStreamReader(dis));
             String line;
-            while ((line = br.readLine()) != null) {
-                sb.append(line);
+            int i = 0;
+            while ((line = br.readLine()) != null) { //mientras haya renglones
+                char[] palabras = line.toCharArray(); //transformo el renglon en un arreglo de caracteres
+                for (int j = 0; j < palabras.length ; j++) { //desde un indice j
+                    estabaAceptando = false; 
+                    StringBuffer cadena = new StringBuffer();
+                    for (int x = j; x < palabras.length ; x++) { //arrancando desde j
+                        cadena = cadena.append(palabras[x]);
+                        if (dfa.accepts(cadena.toString())) { //si acepto la cadena i..j
+                            if (!estabaAceptando) { //y no la estaba aceptando
+                                estabaAceptando = true;
+                                aux = x; //marco el inicio desde donde la empece a aceptar
+                            }
+                        } else { // si no l aacepto
+                            if (estabaAceptando) { //si estaba aceptandola 
+                                donde.add(new Triple<Integer, Integer, Integer>(i + 1, j + 1, x));//retorno el renglon, desde donde empezo,hasta donde termino
+                                estabaAceptando = false;
+                                cadena = new StringBuffer();
+                                j = x; //avanzo hasta x que es donde es el final de la cadena que acepto
+                            }
+                        }
+                    }
+                    if (estabaAceptando) { //reviso de vuelta por si hasta el final del renglon la aceptaba
+                        if (dfa.accepts(cadena.toString())) {
+                            donde.add(new Triple<Integer, Integer, Integer>(i + 1, j + 1, palabras.length));
+                            estabaAceptando = false;
+                        }
+                    }
+                }
+                i++;
             }
             dis.close();
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
         }
-
-        String ret = sb.toString();
-        ret = ret.replaceAll("\n", ";");
-        String[] renglones = ret.split(";");
-        for (int i = 0; i < renglones.length; i++) {
-            char[] palabras = renglones[i].toCharArray();
-            for (int j = 0; j < palabras.length /*MENOS LA LONGUTUD DEL DFA*/; j++) {
-               StringBuffer cadena = new StringBuffer();
-                for (int x = j; x < j/*LA LONGUTUD DEL DFA*/; x++) {
-                    cadena = cadena.append(palabras[x]);
-                }
-                //IF (DFA.ACEPTS(cadena.toString())) THEN RETURN RENGLON,J
-            }
-
+        String[] line = sb.toString().split("\n");
+        for (Triple<Integer, Integer, Integer> p : donde) {
+            System.out.println("reng: " + p.first() + " desde: " + p.second() + " hasta : " + p.third());
         }
-
     }
 }

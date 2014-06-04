@@ -1,7 +1,10 @@
 
 import automata.DFA;
 import automata.FA;
+import automata.Grep;
 import automata.PDA;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 
@@ -9,11 +12,23 @@ import automata.PDA;
 public class Main {
 
     public static void main(String[] args) throws Exception {  
-        DFA pda= (DFA)FA.parse_form_file("test/dfa4");
-        DFA pda2= (DFA)FA.parse_form_file("test/dfa4");
-        System.out.println(pda.lenguajesIguales(pda2));
-        //System.out.println(pda.minimize().to_dot());
+       // DFA pda= (DFA)FA.parse_form_file("test/dfa5");
+       // DFA pda2= (DFA)FA.parse_form_file("test/dfa6");
+        //System.out.println(pda.lenguajesIguales(pda2));
+       // System.out.println(pda.minimize().to_dot());
+       //  System.out.println(pda2.minimize().to_dot());
         //System.out.println(pda.delta(pda.initial(), 'a', pda.tope()).first().name());
-        
+       // String in = "((3+1).*1).(0+1)";
+
+////Pattern p = Pattern.compile("\\((.*?)\\)|(.0?)\\*");
+//Pattern p = Pattern.compile("\\((.*?)\\)");
+//
+//Matcher m = p.matcher(in);
+//m.find();
+////while(m.find()) {
+//    System.out.println(m.group(0));
+//}
+        Grep grep= new Grep();
+        grep.find("test/texto");
     }
 }

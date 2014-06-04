@@ -3,153 +3,180 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package automata;
 
-import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
  * @author nico
  */
 public class LL1 {
-    
-   // String [] nonTers={"E","T","F","L"};
-    HashSet<Character> noTerminales;
-    HashSet<Character> terminales;
-    String [] terminals={".","*","(", ")", "a","b","c","d","e","f","g","h","i","j","k","l","m","n","ñ","o","p","q","r","s","t","u","v","w","x","y","z"};
-    HashSet<Character[]> producciones;
-    HashSet<String> produccionesOrig;
-    String  prod1="E→E|T|T";
-    String  prod2 ="T→T·F|F";
-    String  prod3="F→F*|L";
-    String  prod4 ="L→(E)|a|b|c|d|e";
 
-    public LL1() {
-        this.noTerminales = new HashSet<Character>( );
+    private int indice = -1;
+    private char lookAhead;
+    private char[] palabra;
 
-        noTerminales.add('E');
-        noTerminales.add('T');
-        noTerminales.add('F');
-        noTerminales.add('L');
-   this.terminales = new HashSet<Character>( );
+    public LL1(String palabra) {
 
-        terminales.add('.');
-        terminales.add('*');
-         terminales.add('(');
-          terminales.add(')');
-        terminales.add('a');
-        terminales.add('b');
-        terminales.add('c');
-        terminales.add('d');
-        terminales.add('e');
-        producciones= new HashSet<>();
-        produccionesOrig= new HashSet<>();
-        produccionesOrig.add(prod1);
-        produccionesOrig.add(prod2);
-        produccionesOrig.add(prod3);
-        produccionesOrig.add(prod4);
+        this.palabra = palabra.toCharArray();
+        if (!palabra.isEmpty()) {
+            indice = 0;
+            lookAhead = this.palabra[0];
+            System.out.println(S());
+        }
+    }
+    /* 
+     SD(S → E $)={(, a}
+     SD(E → T R)={(, a}
+     SD(R → + T R)={	+}
+     SD(R → ε)={$, )}
+     SD(T → F Y)={(, a}
+     SD(Y → . F Y)={	.}
+     SD(Y → ε)={+, $, )}
+     SD(F → L G)={(, a}
+     SD(G → * G)={*}
+     SD(G → ε)={., +, $, )}
+     SD(L → ( E ))={	(}
+     SD(L → a)={a}
+     */
 
-                                
-        
-                
+    public String S() {
+
+        Pattern pat = Pattern.compile("[a-z]|\\(");
+        Matcher mat = pat.matcher(String.valueOf(lookAhead));
+
+        if (mat.matches()) {
+            return (E() + Match('$'));
+        } else {
+            System.err.print("No hay regla S");
+            return null;
+        }
+
     }
 
-    private HashSet<String[]> obtenerProducciones(){
-        HashSet<String[]> ret= new HashSet<>();
-        for(String prod: produccionesOrig){
-            String[] a= prod.split("→");
-           // System.out.println(a[1]);
-            char[] b= a[1].toCharArray();
-            //System.out.println("asdasda "+b[0]+b[1]);
-            int i=0;
-            while(i<b.length){
-                if( b[i]!='|'){
-                    String[] array= new String[3];
-                    array[0]=a[0];
-                    array[1]= "→";
-                    //System.out.println(a[0]+" → "+b[i]);
-                    array[2]= String.valueOf(b[i]);
-                    ret.add(array);
-                }
-                
-              i++;  
+    public String E() {
+        Pattern pat = Pattern.compile("[a-z]|\\(");
+        Matcher mat = pat.matcher(String.valueOf(lookAhead));
+        if (mat.matches()) {
+            return (T() + R());
+        } else {
+            System.err.print("No hay regla E");
+            return null;
+        }
+    }
+
+    public String T() {
+        Pattern pat = Pattern.compile("[a-z]|\\(");
+        Matcher mat = pat.matcher(String.valueOf(lookAhead));
+        if (mat.matches()) {
+            return (F() + Y());
+        } else {
+            System.err.print("No hay regla T");
+            return null;
+
+        }
+    }
+
+    public String F() {
+        Pattern pat = Pattern.compile("[a-z]|\\(");
+        Matcher mat = pat.matcher(String.valueOf(lookAhead));
+        if (mat.matches()) {
+            return (L() + G());
+        } else {
+            System.err.print("No hay regla F");
+            return null;
+        }
+    }
+
+    public String L() {
+        Pattern pat = Pattern.compile("\\(|[a-z]");
+        Matcher mat = pat.matcher(String.valueOf(lookAhead));
+        if (mat.matches()) {
+            if (lookAhead == '(') {
+                return (Match('(') + E() + Match(')'));
+            } else {
+
+                return (Match(lookAhead));
             }
+
+        } else {
+            System.err.print("No hay regla L");
+            return null;
+
         }
-        return ret;
     }
 
-
-
-
-private HashSet<Character> primero(Character x){
-    HashSet<Character> ret= new HashSet<>();
-    HashSet<Character>retViejo= new HashSet<>();
-    boolean primerCiclo=true;
-    if(terminales.contains(x)){
-        ret.add(x);
-        System.out.println("es terminal!");
-        return ret;
-        
-    }
-    else{
-        while(!sonIguales(ret, retViejo)||primerCiclo){
-            primerCiclo=false;
-        for(Character[] prod: producciones){
-            System.out.println(prod[0]+""+prod[1]+""+prod[2]);
-            if(prod[0]==x){
-                int i=2;
-                //System.out.println("x: "+x);
-                while(i<prod.length){
-                    if(prod[i]!='|' && prod[i]!=x){
-                        retViejo=(HashSet<Character>) clonar(ret);
-                        //System.out.println(prod[i]);
-                        ret.addAll(primero(prod[i]));
-                    }
-                    i++;
-                }
-                
+    public String R() {
+        Pattern pat = Pattern.compile("\\+|$|\\)");
+        Matcher mat = pat.matcher(String.valueOf(lookAhead));
+        if (mat.matches()) {
+            if (lookAhead == '+') {
+                return (Match('+') + T() + R());
+            } else {
+                //epsilon
+                return ("");
             }
+        } else {
+            System.out.println(String.valueOf(lookAhead));
+            System.err.print("No hay regla E_");
+            return null;
+
         }
-       
-        
+    }
+
+    public String Y() {
+        Pattern pat = Pattern.compile(".|\\+|$|\\)");
+        Matcher mat = pat.matcher(String.valueOf(lookAhead));
+        if (mat.matches()) {
+            if (lookAhead == '.') {
+                return (Match('.') + F() + Y());
+
+            } else {
+                //epsilon
+                return ("");
+            }
+        } else {
+            System.err.print("No hay regla");
+            return null;
+
         }
-        
     }
-    
-    return ret;
 
-}
-
-public HashSet<Character> clonar(HashSet<Character> aClonar){
-    HashSet<Character> ret= new HashSet<>();
-    for(Character c: aClonar){
-        ret.add(c.charValue());
-    }
-    return ret;
-}
-
-public boolean sonIguales (HashSet<Character> a, HashSet<Character> b){
-    if(a.size() ==b.size() ){
-        for(Character c: a){
-            if(!b.contains(c) )
-                return false;
+    public String G() {
+        Pattern pat = Pattern.compile("\\*|.|$|\\+|\\)");
+        Matcher mat = pat.matcher(String.valueOf(lookAhead));
+        if (mat.matches()) {
+            if (lookAhead == '*') {
+                return (Match('*') + G());
+            } else {
+                //epsilon
+                return ("");
+            }
+        } else {
+            System.err.print("No hay regla");
+            return null;
         }
-        return true;
     }
-    return false;
-}
 
-public static void main(String[] args) throws Exception {
-    LL1 ll1= new LL1();
-   // HashSet<Character> primeros=ll1.primero('L');
-   // System.out.println(primeros);
-   HashSet<String[]>a=ll1.obtenerProducciones();
-   for(String[] as: a){
-       for(String c: as){
-       System.out.print(c);
-       }
-       System.out.println();
-   }
-}
+    private String Match(char simbolo) {
+        if (lookAhead == simbolo) {
+            indice++;
+            String ret = String.valueOf(lookAhead);
+            System.out.println(palabra.length);
+            if (indice-2 == palabra.length) {
+
+                lookAhead = palabra[indice];
+            }
+            return ret;
+        } else {
+            System.err.print("No machea");
+            return null;
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        LL1 ll1 = new LL1("a+a$");
+    }
 }

@@ -172,11 +172,16 @@ public class PDA {
                          stack.pop();
                     }
                     else{ // si tiene más de un elemento, es un intercambio de valores
-                        
+                        stack.pop();
                         stack.push(consumoDividido[0]);
                     }
                     }else{
-                            stack.push(consumoDividido[0]);
+                        stack.pop();
+                        int i=0;
+                        while(i<consumoDividido.length){
+                            stack.push(consumoDividido[i]);
+                            i++;
+                        }
                             }
                 
                 return new Pair<>((State)((Pair)t.fourth()).first(),(String)((Pair)t.fourth()).second());

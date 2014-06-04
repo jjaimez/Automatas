@@ -46,34 +46,37 @@ F|    F->a   |         |         | F->(E)    |         |       |
  */
 public class LL1_Parser {
 //input
-   public String input="";//"i*i$"
-    private int indexOfInput=-1;
+   public String entrada;
+    private int indice=-1;
     //Stack
-    Stack <String> strack=new Stack<String>();
+    Stack <String> stack=new Stack<String>();
     //Table of rules
-    String [][] table=
+    String [][] tabla=
     {
-        {"E$",null,null,"E$",null,null}
+        {"E$",null,null,"E$",null,null,null}
             ,
-        {"TK",null,null,"TK",null,""}
+        {"TR",null,null,"TR",null,null,null}
             ,
-        {null,"+TK",null,null,"",""}
+        {null,"+TR",null,null,null,"",null}
             ,
-        {"FH",null,null,"FH",null,null}
+        {"FY",null,null,"FY",null,null,null}
             ,
-        {null,"","*FH",null,"",""}
+        {null,null,"",null,null,"",".FY"}
             ,
-        {"a",null,null,"(E)",null,null}
-    
+        {"LY",null,null,"LY",null,null,null}
+            ,
+        {"LY",null,"*G","LY",null,"",""}
+            ,
+        {"a",null,null,"(E)",null,null,null}
     
     };
-    String [] nonTers={"G","E","K","T","H","F"};
-String [] terminals={"a","+","*","(",")","$"};
+    String [] nonTerminales={"E","R","T","Y","L","F","G","S"};
+String [] terminales={"a","+","*","(",")","$","."};
 
 
-public LL1_Parser(String in)
+public LL1_Parser(String ent)
 {
-this.input=in;
+this.entrada=ent;
 }
 
 private  void pushRule(String rule)
@@ -81,6 +84,7 @@ private  void pushRule(String rule)
 for(int i=rule.length()-1;i>=0;i--)
 {
 char ch=rule.charAt(i);
+System.out.println("push rule:" +ch);
 String str=String.valueOf(ch);
 push(str);
 }
@@ -91,16 +95,19 @@ public void algorithm    ()
 {
 
     
-    push(this.input.charAt(0)+"");//
-    push("G");
+    push(this.entrada.charAt(0)+"");//
+    System.out.println("push: "+this.entrada.charAt(0));
+    push("S");
     //Read one token from input
     
     String token=read();
+    System.out.println("token: "+ token);
     String top=null;
     
     do
     {
         top=this.pop();
+        System.out.println("tope: "+top);
         //if top is non-terminal
         if(isNonTerminal(top))
         {
@@ -145,9 +152,9 @@ token =read();
 }
 
     private boolean isTerminal(String s) {
-               for(int i=0;i<this.terminals.length;i++)
+               for(int i=0;i<this.terminales.length;i++)
         {
-        if(s.equals(this.terminals[i]))
+        if(s.equals(this.terminales[i]))
         {
         return true;
         }
@@ -157,9 +164,9 @@ token =read();
     }
 
     private boolean isNonTerminal(String s) {
-        for(int i=0;i<this.nonTers.length;i++)
+        for(int i=0;i<this.nonTerminales.length;i++)
         {
-        if(s.equals(this.nonTers[i]))
+        if(s.equals(this.nonTerminales[i]))
         {
         return true;
         }
@@ -169,18 +176,18 @@ token =read();
     }
 
     private String read() {
-        indexOfInput++;
-        char ch=this.input.charAt(indexOfInput);
+        indice++;
+        char ch=this.entrada.charAt(indice);
 String str=String.valueOf(ch);
 
         return str;
     }
 
     private void push(String s) {
-     this.strack.push(s);   
+     this.stack.push(s);   
     }
         private String pop() {
-   return this.strack.pop();   
+   return this.stack.pop();   
     }
 
     private void error(String message) {
@@ -192,7 +199,7 @@ String str=String.valueOf(ch);
         
     int row=getnonTermIndex(non);
     int column=getTermIndex(term);
-    String rule=this.table[row][column];
+    String rule=this.tabla[row][column];
     if(rule==null)
     {
     error("There is no Rule by this , Non-Terminal("+non+") ,Terminal("+term+") ");
@@ -201,9 +208,9 @@ String str=String.valueOf(ch);
     }
 
     private int getnonTermIndex(String non) {
-       for(int i=0;i<this.nonTers.length;i++)
+       for(int i=0;i<this.nonTerminales.length;i++)
        {
-       if(non.equals(this.nonTers[i]))
+       if(non.equals(this.nonTerminales[i]))
        {
        return i;
        }
@@ -213,9 +220,9 @@ String str=String.valueOf(ch);
     }
 
     private int getTermIndex(String term) {
-              for(int i=0;i<this.terminals.length;i++)
+              for(int i=0;i<this.terminales.length;i++)
        {
-       if(term.equals(this.terminals[i]))
+       if(term.equals(this.terminales[i]))
        {
        return i;
        }
@@ -228,7 +235,7 @@ String str=String.valueOf(ch);
     public static void main(String[] args) {
         // TODO code application logic here
         
-        LL1_Parser parser=new LL1_Parser("a+(a+a*(a)+a)$");//i*i+(i+i)$
+        LL1_Parser parser=new LL1_Parser("(a)+(a)$");//i*i+(i+i)$
         parser.algorithm();
   
     }
