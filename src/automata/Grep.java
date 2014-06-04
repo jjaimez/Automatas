@@ -26,10 +26,10 @@ public class Grep {
             int i = 0;
             while ((line = br.readLine()) != null) { //mientras haya renglones
                 char[] palabras = line.toCharArray(); //transformo el renglon en un arreglo de caracteres
-                for (int j = 0; j < palabras.length ; j++) { //desde un indice j
-                    estabaAceptando = false; 
+                for (int j = 0; j < palabras.length; j++) { //desde un indice j
+                    estabaAceptando = false;
                     StringBuffer cadena = new StringBuffer();
-                    for (int x = j; x < palabras.length ; x++) { //arrancando desde j
+                    for (int x = j; x < palabras.length; x++) { //arrancando desde j
                         cadena = cadena.append(palabras[x]);
                         if (dfa.accepts(cadena.toString())) { //si acepto la cadena i..j
                             if (!estabaAceptando) { //y no la estaba aceptando

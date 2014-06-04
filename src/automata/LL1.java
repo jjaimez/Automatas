@@ -24,7 +24,7 @@ public class LL1 {
         if (!palabra.isEmpty()) {
             indice = 0;
             lookAhead = this.palabra[0];
-            System.out.println("la cadena ingresada es aceptada por el LL1? "+ palabra.equals(S()));
+            System.out.println("la cadena ingresada es aceptada por el LL1? " + palabra.equals(S()));
         }
     }
     /* 
@@ -100,7 +100,6 @@ public class LL1 {
 
                 return (Match(lookAhead));
             }
-
         } else {
             System.err.print("No hay regla L");
             return null;
@@ -119,7 +118,6 @@ public class LL1 {
                 return ("");
             }
         } else {
-            //System.out.println(String.valueOf(lookAhead));
             System.err.print("No hay regla E_");
             return null;
 
@@ -164,11 +162,9 @@ public class LL1 {
         if (lookAhead == simbolo) {
             indice++;
             String ret = String.valueOf(lookAhead);
-            //System.out.println(palabra.length);
-                if(simbolo!='#')
-                    lookAhead = palabra[indice];
-               // System.out.println(lookAhead);
-           
+            if (simbolo != '#') {
+                lookAhead = palabra[indice];
+            }
             return ret;
         } else {
             System.err.print("No machea");

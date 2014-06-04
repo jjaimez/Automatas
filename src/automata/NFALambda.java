@@ -80,7 +80,6 @@ public class NFALambda extends FA {
             utilizados.add(t);
             if ((s.contains((State) t.first())) && ((Character) t.second()).equals(Lambda)) {
                 if (s.add((State) t.third())) {
-                    //  System.out.println("ESTADO AGREGADO A LA CLAUSURA "+ t.third().name());
                     trans.addAll(utilizados);
                 }
             }
@@ -270,7 +269,7 @@ public class NFALambda extends FA {
         }
         return ret;
     }
-    
+
     public NFALambda concate(NFALambda nfal2) {
         boolean cambio = true;
         NumeroAleatorio na = new NumeroAleatorio(7);
@@ -336,9 +335,9 @@ public class NFALambda extends FA {
         return new NFALambda(newStates, newAlphabet, newTransitions, newInitial, newFinal_states);
     }
 
-   public NFALambda estrella() {
+    public NFALambda estrella() {
         NumeroAleatorio na = new NumeroAleatorio(7);
-       
+
         Set<State> newStates = new HashSet();
         newStates.addAll(this.states);
         Set<Character> newAlphabet = new HashSet();
@@ -367,7 +366,7 @@ public class NFALambda extends FA {
         newFinal_states.add(finalS);
         for (State s : this.final_states) {
             newTransitions.add(new Triple(s, NFALambda.Lambda, finalS));
-             newTransitions.add(new Triple(s, NFALambda.Lambda, this.initial));
+            newTransitions.add(new Triple(s, NFALambda.Lambda, this.initial));
         }
         newTransitions.add(new Triple(newInitial, NFALambda.Lambda, this.initial));
         newStates.add(newInitial);
@@ -375,8 +374,8 @@ public class NFALambda extends FA {
         newTransitions.add(new Triple(newInitial, NFALambda.Lambda, finalS));
         return new NFALambda(newStates, newAlphabet, newTransitions, newInitial, newFinal_states);
     }
-    
-      public NFALambda union(NFALambda nfal2) {
+
+    public NFALambda union(NFALambda nfal2) {
         boolean cambio = true;
         NumeroAleatorio na = new NumeroAleatorio(7);
         while (cambio) {

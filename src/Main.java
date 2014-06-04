@@ -1,7 +1,9 @@
 
 import automata.DFA;
+import automata.ER;
 import automata.FA;
 import automata.Grep;
+import automata.NFALambda;
 import automata.PDA;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,7 +30,10 @@ public class Main {
 ////while(m.find()) {
 //    System.out.println(m.group(0));
 //}
-        Grep grep= new Grep();
-        grep.find("test/texto");
-    }
+       // Grep grep= new Grep();
+        //grep.find("test/texto");
+        ER er = new ER();
+        NFALambda dfa = er.casoBase('a');
+        System.out.println(dfa.to_dot());
+        }
 }
