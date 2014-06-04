@@ -72,17 +72,13 @@ public class LL1_Parser {
 
     //algorithm
     public void algorithm() {
-
-
         push(this.entrada.charAt(0) + "");//
         System.out.println("push: " + this.entrada.charAt(0));
         push("S");
         //Read one token from input
-
         String token = read();
         System.out.println("token: " + token);
         String top = null;
-
         do {
             top = this.pop();
             System.out.println("tope: " + top);
@@ -96,8 +92,7 @@ public class LL1_Parser {
                 } else {
                     System.out.println("Matching: Terminal :( " + token + " )");
                     token = read();
-//top=pop();
-
+                    //top=pop();
                 }
             } else {
                 error("Never Happens , Because top : ( " + top + " )");
@@ -106,9 +101,7 @@ public class LL1_Parser {
                 break;
             }
             //if top is terminal
-
         } while (true);//out of the loop when $
-
         //accept
         if (token.equals("$")) {
             System.out.println("Input is Accepted by LL1");
@@ -122,7 +115,6 @@ public class LL1_Parser {
             if (s.equals(this.terminales[i])) {
                 return true;
             }
-
         }
         return false;
     }
@@ -132,7 +124,6 @@ public class LL1_Parser {
             if (s.equals(this.nonTerminales[i])) {
                 return true;
             }
-
         }
         return false;
     }
@@ -141,7 +132,6 @@ public class LL1_Parser {
         indice++;
         char ch = this.entrada.charAt(indice);
         String str = String.valueOf(ch);
-
         return str;
     }
 
@@ -159,7 +149,6 @@ public class LL1_Parser {
     }
 
     public String getRule(String non, String term) {
-
         int row = getnonTermIndex(non);
         int column = getTermIndex(term);
         String rule = this.tabla[row][column];
@@ -192,7 +181,6 @@ public class LL1_Parser {
     //main
     public static void main(String[] args) {
         // TODO code application logic here
-
         LL1_Parser parser = new LL1_Parser("(a)+(a)$");//i*i+(i+i)$
         parser.algorithm();
 

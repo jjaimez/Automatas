@@ -19,7 +19,6 @@ public class LL1 {
     private char[] palabra;
 
     public LL1(String palabra) {
-
         this.palabra = palabra.toCharArray();
         if (!palabra.isEmpty()) {
             indice = 0;
@@ -43,7 +42,6 @@ public class LL1 {
      */
 
     public String S() {
-
         Pattern pat = Pattern.compile("[a-z]|\\(");
         Matcher mat = pat.matcher(String.valueOf(lookAhead));
 
@@ -120,7 +118,6 @@ public class LL1 {
         } else {
             System.err.print("No hay regla E_");
             return null;
-
         }
     }
 
@@ -138,7 +135,6 @@ public class LL1 {
         } else {
             System.err.print("No hay regla");
             return null;
-
         }
     }
 
