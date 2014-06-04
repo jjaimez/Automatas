@@ -13,6 +13,9 @@ import utils.Triple;
  *
  * @author jacinto
  */
+
+
+//Las funciones ya estan implementadas, falta usar el parse para dividir la exprecion e ir creandola
 public class ER {
     
     public ER(){};

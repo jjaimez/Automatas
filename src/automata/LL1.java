@@ -1,9 +1,7 @@
-
 package automata;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 public class LL1 {
 
@@ -13,15 +11,16 @@ public class LL1 {
     private String palabraPasada;
 
     public LL1(String palabra) {
+        palabra = palabra + "#";
         this.palabra = palabra.toCharArray();
         if (!palabra.isEmpty()) {
             indice = 0;
             lookAhead = this.palabra[0];
-            this.palabraPasada= palabra;
+            this.palabraPasada = palabra;
         }
     }
-    
-    public boolean ejecutar(){
+
+    public boolean ejecutar() {
         return palabraPasada.equals(S());
     }
     /*
@@ -106,7 +105,7 @@ public class LL1 {
     public String R() {
         //Pattern pat = Pattern.compile("\\+|#|\\)");
         //Matcher mat = pat.matcher(String.valueOf(lookAhead));
-        if (String.valueOf(lookAhead).equals("+")||String.valueOf(lookAhead).equals("#")||String.valueOf(lookAhead).equals(")")) {
+        if (String.valueOf(lookAhead).equals("+") || String.valueOf(lookAhead).equals("#") || String.valueOf(lookAhead).equals(")")) {
             if (lookAhead == '+') {
                 return (Match('+') + T() + R());
             } else {
@@ -120,9 +119,9 @@ public class LL1 {
     }
 
     public String Y() {
-       // Pattern pat = Pattern.compile(".|\\+|#|\\)");
-       // Matcher mat = pat.matcher(String.valueOf(lookAhead));
-        if (String.valueOf(lookAhead).equals(".")||String.valueOf(lookAhead).equals("+")||String.valueOf(lookAhead).equals("#")||String.valueOf(lookAhead).equals(")")) {
+        // Pattern pat = Pattern.compile(".|\\+|#|\\)");
+        // Matcher mat = pat.matcher(String.valueOf(lookAhead));
+        if (String.valueOf(lookAhead).equals(".") || String.valueOf(lookAhead).equals("+") || String.valueOf(lookAhead).equals("#") || String.valueOf(lookAhead).equals(")")) {
             if (lookAhead == '.') {
                 return (Match('.') + F() + Y());
 
@@ -137,9 +136,9 @@ public class LL1 {
     }
 
     public String G() {
-       // Pattern pat = Pattern.compile("*|.|#|\\+|\\)");
-       // Matcher mat = pat.matcher(String.valueOf(lookAhead));
-        if (String.valueOf(lookAhead).equals(".")||String.valueOf(lookAhead).equals("+")||String.valueOf(lookAhead).equals("#")||String.valueOf(lookAhead).equals(")")||String.valueOf(lookAhead).equals("*")) {
+        // Pattern pat = Pattern.compile("*|.|#|\\+|\\)");
+        // Matcher mat = pat.matcher(String.valueOf(lookAhead));
+        if (String.valueOf(lookAhead).equals(".") || String.valueOf(lookAhead).equals("+") || String.valueOf(lookAhead).equals("#") || String.valueOf(lookAhead).equals(")") || String.valueOf(lookAhead).equals("*")) {
             if (lookAhead == '*') {
                 return (Match('*') + G());
             } else {
@@ -166,7 +165,6 @@ public class LL1 {
             return null;
         }
     }
-
 //    public static void main(String[] args) throws Exception {
 //        LL1 ll1 = new LL1("a+a+(a+a.a*#");
 //        System.out.println(ll1.ejecutar());

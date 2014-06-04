@@ -14,7 +14,7 @@ public class Grep {
     public void find(String path) throws Exception {
         FileReader in = null;
         HashSet<Triple<Integer, Integer, Integer>> donde = new HashSet();
-        DFA dfa = (DFA) FA.parse_form_file("test/dfa1"); //cambiar esto !!!!
+        DFA dfa = (DFA) FA.parse_form_file("test/dfa1"); ////ACA DEBERÍA IR LA PARTE EN EL QUE CONSTRUIMOS EL AUTOMATA DFA DADA LA EXPRESIÓN REGULAR
         StringBuilder sb = new StringBuilder();
         boolean estabaAceptando;
         int aux = -1;
