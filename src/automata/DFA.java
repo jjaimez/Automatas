@@ -33,16 +33,16 @@ public class DFA extends FA {
         this.transitions = transitions;
         this.initial = initial;
         this.final_states = final_states;
-        if(!this.states.containsAll(this.final_states)){
-           throw new java.lang.IllegalArgumentException("Los estados finales no estan incluidos en los estados");  
+        if (!this.states.containsAll(this.final_states)) {
+            throw new java.lang.IllegalArgumentException("Los estados finales no estan incluidos en los estados");
         }
-        if(!transitionsAreCorrect()){
+        if (!transitionsAreCorrect()) {
             throw new java.lang.IllegalArgumentException("Las transiciones son incorrectas");
         }
-        if(!states.contains(initial)){
+        if (!states.contains(initial)) {
             throw new java.lang.IllegalArgumentException("El estado inicial no pertenece a los estados");
         }
-        if(!isDeterministic()){
+        if (!isDeterministic()) {
             throw new java.lang.IllegalArgumentException("No es deterministico");
         }
     }
@@ -75,7 +75,7 @@ public class DFA extends FA {
 
     @Override
     public State delta(State from, Character c) {
-       // assert states().contains(from);
+        //  assert states().contains(from);
         assert alphabet().contains(c);
         for (Triple t : transitions) {
             if (((State) t.first()).equals(from) && ((Character) t.second()).equals(c)) {
@@ -87,22 +87,22 @@ public class DFA extends FA {
 
     @Override
     public String to_dot() {
-       assert rep_ok();
-       StringBuilder ret = new StringBuilder();
+        assert rep_ok();
+        StringBuilder ret = new StringBuilder();
         ret.append("digraph {\n");
         ret.append("inic[shape=point]; \n");
         ret.append("inic->");
-        ret.append("\""+initial.name()+"\"");
+        ret.append("\"" + initial.name() + "\"");
         ret.append(";\n");
         for (Triple tr : transitions) {
-            ret.append("\""+((State) tr.first()).name()+"\""); //desde
+            ret.append("\"" + ((State) tr.first()).name() + "\""); //desde
             ret.append("->");
-            ret.append("\""+((State) tr.third()).name()+"\""); //hasta
+            ret.append("\"" + ((State) tr.third()).name() + "\""); //hasta
             String aux = " [label=\"" + tr.second() + "\"];\n";
             ret.append(aux);
         }
         for (State s : final_states) {
-            ret.append("\""+s.name()+"\"");
+            ret.append("\"" + s.name() + "\"");
             ret.append("[shape=doublecircle];\n");
         }
         ret.append("}");
@@ -115,7 +115,7 @@ public class DFA extends FA {
     @Override
     public boolean accepts(String string) {
         assert rep_ok();
-        assert string!=null;
+        assert string != null;
         assert verify_string(string);
         char[] carac = string.toCharArray();
         State avanzo = initial;
@@ -184,7 +184,7 @@ public class DFA extends FA {
     public DFA complement() {
         assert rep_ok();
         HashSet<State> finaStates = new HashSet();
-        DFA dfaCompleto=this.completarDelta();
+        DFA dfaCompleto = this.completarDelta();
         finaStates.addAll(dfaCompleto.states);
         finaStates.removeAll(dfaCompleto.final_states);
         DFA complemento = new DFA(dfaCompleto.states, dfaCompleto.alphabet, dfaCompleto.transitions, dfaCompleto.initial, finaStates);
@@ -200,7 +200,7 @@ public class DFA extends FA {
         assert rep_ok();
         HashSet<Triple<State, Character, State>> trans = (HashSet<Triple<State, Character, State>>) transitions;
         HashSet<State> finales = (HashSet<State>) final_states;
-        HashSet<State> estados= (HashSet<State>) states;
+        HashSet<State> estados = (HashSet<State>) states;
         State inicial = new State("q0i");
         estados.add(inicial);
         finales.add(inicial);
@@ -227,51 +227,52 @@ public class DFA extends FA {
     public DFA union(DFA other) {
         assert rep_ok();
         assert other.rep_ok();
-         HashSet<State> q =new HashSet<>(); 
-         HashSet<Triple<State, Character, State>> trans = new HashSet<>();
-         HashSet<Character> alfabeto =(HashSet<Character>)alphabet; 
-         alfabeto.addAll(other.alphabet);
-        for(State s: states){
-            State stateAux= new State(s.name()+"-1");
+        HashSet<State> q = new HashSet<>();
+        HashSet<Triple<State, Character, State>> trans = new HashSet<>();
+        HashSet<Character> alfabeto = (HashSet<Character>) alphabet;
+        alfabeto.addAll(other.alphabet);
+        for (State s : states) {
+            State stateAux = new State(s.name() + "-1");
             q.add(stateAux);
         }
-        for(State s: other.states){
-            State stateAux= new State(s.name()+"-2");
+        for (State s : other.states) {
+            State stateAux = new State(s.name() + "-2");
             q.add(stateAux);
         }
-        for(Triple<State,Character,State> t: transitions){
-           Triple<State,Character,State> transAux= new Triple<>(new State(t.first().name()+"-1"),t.second(),new State(t.third().name()+"-1"));
+        for (Triple<State, Character, State> t : transitions) {
+            Triple<State, Character, State> transAux = new Triple<>(new State(t.first().name() + "-1"), t.second(), new State(t.third().name() + "-1"));
             trans.add(transAux);
         }
-        for(Triple<State,Character,State> t: other.transitions){
-           Triple<State,Character,State> transAux= new Triple<>(new State(t.first().name()+"-2"),t.second(),new State(t.third().name()+"-2"));
+        for (Triple<State, Character, State> t : other.transitions) {
+            Triple<State, Character, State> transAux = new Triple<>(new State(t.first().name() + "-2"), t.second(), new State(t.third().name() + "-2"));
             trans.add(transAux);
         }
-        State ini= new State("i");
+        State ini = new State("i");
         q.add(ini);
-        for(Character chara: alphabet){
-            State to= delta(initial, chara);
-            if(to!=null){
-                Triple<State,Character,State> tri= new Triple<>(ini,chara,new State(to.name()+"-1"));
-                trans.add(tri);                
+        for (Character chara : alphabet) {
+            State to = delta(initial, chara);
+            if (to != null) {
+                Triple<State, Character, State> tri = new Triple<>(ini, chara, new State(to.name() + "-1"));
+                trans.add(tri);
             }
         }
-        for(Character chara: other.alphabet){
-            State to= other.delta(other.initial, chara);
-            if(to!=null){
-                Triple<State,Character,State> tri= new Triple<>(ini,chara,new State(to.name()+"-2"));
+        for (Character chara : other.alphabet) {
+            State to = other.delta(other.initial, chara);
+            if (to != null) {
+                Triple<State, Character, State> tri = new Triple<>(ini, chara, new State(to.name() + "-2"));
                 trans.add(tri);
             }
         }
         HashSet<State> finales = new HashSet<>();
-        for(State s: final_states){
-            State stateAux= new State(s.name()+"-1");
-            finales.add(stateAux);
-        }for(State s: other.final_states){
-            State stateAux= new State(s.name()+"-2");
+        for (State s : final_states) {
+            State stateAux = new State(s.name() + "-1");
             finales.add(stateAux);
         }
-        if(final_states.contains(new State(initial.name()+"-1")) || other.final_states.contains(new State(other.initial.name()+"-2"))){
+        for (State s : other.final_states) {
+            State stateAux = new State(s.name() + "-2");
+            finales.add(stateAux);
+        }
+        if (final_states.contains(new State(initial.name() + "-1")) || other.final_states.contains(new State(other.initial.name() + "-2"))) {
             finales.add(ini);
         }
         return new NFA(q, alfabeto, trans, ini, finales).toDFA();
@@ -362,7 +363,6 @@ public class DFA extends FA {
         }
         return temp;
     }
-
     //dfs recursivo
     HashSet<State> marcados = new HashSet<>();
     HashSet<State> ciclos = new HashSet<>();
@@ -410,51 +410,40 @@ public class DFA extends FA {
         }
         return cycle;
     }
-    
-    
-    /*
-    Ejemplo que antes NO pasaba el test y ahora si
-    digraph {
-	inic[shape=point];
-    inic->q0;
-    q0->q1 [label="a"];
-    q1->q2 [label="a"];
-    q2->q1 [label="b"];
-    q1->q3 [label="b"];
-    q3->q4 [label="b"];
-    q2->q4[label="c"];
-    q4[shape=doublecircle];
-    q1[shape=doublecircle];
-    }
-    */
 
-   
-    
-    private DFA completarDelta(){
-        State trampa= new State("trampa");
-        HashSet<State> estados= (HashSet<State>)states;
+    /*
+     Ejemplo que antes NO pasaba el test y ahora si
+     digraph {
+     inic[shape=point];
+     inic->q0;
+     q0->q1 [label="a"];
+     q1->q2 [label="a"];
+     q2->q1 [label="b"];
+     q1->q3 [label="b"];
+     q3->q4 [label="b"];
+     q2->q4[label="c"];
+     q4[shape=doublecircle];
+     q1[shape=doublecircle];
+     }
+     */
+    private DFA completarDelta() {
+        State trampa = new State("trampa");
+        HashSet<State> estados = (HashSet<State>) states;
         estados.add(trampa);
-        HashSet<Triple<State,Character,State>> trans= (HashSet<Triple<State, Character, State>>)transitions;
-        for(State s: estados){
-            for(Character c: alphabet){
-                State aux= delta(s, c);
-                if(aux==null){
-                    Triple<State,Character,State> add= new Triple<>(s,c,trampa);
+        HashSet<Triple<State, Character, State>> trans = (HashSet<Triple<State, Character, State>>) transitions;
+        for (State s : estados) {
+            for (Character c : alphabet) {
+                State aux = delta(s, c);
+                if (aux == null) {
+                    Triple<State, Character, State> add = new Triple<>(s, c, trampa);
                     trans.add(add);
                 }
             }
         }
         return (new DFA(estados, alphabet, trans, initial, final_states));
     }
-    
-    
-    
-    
-    
-    
-    
-    
-        private int buscarIndiceY(State s, String[][] matriz, int utilizados) {
+
+    private int buscarIndiceY(State s, String[][] matriz, int utilizados) {
         int i = 1;
         while (i < utilizados) {
             if (s.name().equals(matriz[utilizados - 1][i])) {
@@ -538,56 +527,66 @@ public class DFA extends FA {
             }
         }
         Set finales = new HashSet();
-        for (State s1 : utilizados) {
-            if (final_states.contains(s1)) {
+        for (State s1 : final_states) {
+            if (utilizados.contains(s1)) {
                 finales.add(s1);
             }
         }
         int tamanhoMatriz = utilizados.size() + 1;
-       // System.out.println("TAMAÑO DE LA MATRIZ UTILIZADOS: " + tamanhoMatriz);
+        // System.out.println("TAMAÑO DE LA MATRIZ UTILIZADOS: " + tamanhoMatriz);
         String[][] matriz = new String[tamanhoMatriz][tamanhoMatriz];
         Iterator it = utilizados.iterator();
         int i = 0;
-        int j = 1;
+        int j = 0;
         for (i = 0; i < tamanhoMatriz - 1; i++) { //inicializo la matriz para minimizar
             State estado = (State) it.next();
             matriz[i][0] = estado.name();
             matriz[tamanhoMatriz - 1][i + 1] = estado.name();
             matriz[i][i + 1] = "X";
         }
-        matriz[0][tamanhoMatriz - 1] = "X";
         for (i = 0; i < tamanhoMatriz - 1; i++) {
             for (j = 1; j < tamanhoMatriz; j++) {
-                if (!matriz[i][0].equals(matriz[tamanhoMatriz - 1][j])) {
+                if (matriz[i][j] == null) {
                     State s1 = new State(matriz[i][0]);
                     State s2 = new State(matriz[tamanhoMatriz - 1][j]);
-                    if ((finales.contains(s1) && !finales.contains(s2)) || (!finales.contains(s1) && finales.contains(s2))) {
+                    if ((finales.contains(s1) && (!finales.contains(s2))) || ((!finales.contains(s1)) && finales.contains(s2))) {
                         matriz[i][j] = "X";
+                        matriz[buscarIndiceX(s2, matriz, tamanhoMatriz)][buscarIndiceY(s1, matriz, tamanhoMatriz)] = "X";
                     }
                 }
             }
         }
+        matriz[tamanhoMatriz - 1][0] = "X";
         //HASTA ACA PERFECTO
+//                for (i = 0; i < tamanhoMatriz; i++) {
+//            for (j = 0; j < tamanhoMatriz; j++) {
+//                System.out.println("MATRIZ[" + i + "][" + j + "] TIENE EL VALOR: " + matriz[i][j]);
+//            }
+//        }
         for (i = 0; i < tamanhoMatriz - 1; i++) {
             for (j = 1; j < tamanhoMatriz; j++) {
-                if (!matriz[i][0].equals(matriz[tamanhoMatriz - 1][j])) {
+                if (matriz[i][j] == null) {
                     State s1 = new State(matriz[i][0]);
                     State s2 = new State(matriz[tamanhoMatriz - 1][j]);
                     for (Character c : alphabet) {
                         if ((delta(s1, c) != null) && (delta(s2, c) != null)) {
-                            if ((finales.contains(delta(s1, c)) && !finales.contains(delta(s2, c))) || (!finales.contains(delta(s1, c)) && finales.contains(delta(s2, c)))) {
+                            if ((finales.contains(delta(s1, c)) && (!finales.contains(delta(s2, c)))) || ((!finales.contains(delta(s1, c))) && finales.contains(delta(s2, c)))) {
                                 matriz[i][j] = "X";
+                                matriz[buscarIndiceX(s2, matriz, tamanhoMatriz)][buscarIndiceY(s1, matriz, tamanhoMatriz)] = "X";
                             }
                         } else {
-                            if ((delta(s1, c) == null) || (delta(s2, c) == null)) {
+                            if ((delta(s1, c) != null) || (delta(s2, c) != null)) {
                                 matriz[i][j] = "X";
+                                matriz[buscarIndiceX(s2, matriz, tamanhoMatriz)][buscarIndiceY(s1, matriz, tamanhoMatriz)] = "X";
                             }
                         }
                     }
                 }
             }
         }
-      //  System.out.println("TERMINE LA INICIALIZACION");
+        //HASTA ACA ANDA PERFECTO
+//
+//          System.out.println("TERMINE LA INICIALIZACION");
 //        for (i = 0; i < tamanhoMatriz; i++) {
 //            for (j = 0; j < tamanhoMatriz; j++) {
 //                System.out.println("MATRIZ[" + i + "][" + j + "] TIENE EL VALOR: " + matriz[i][j]);
@@ -598,24 +597,25 @@ public class DFA extends FA {
             cambio = false;
             for (i = 0; i < tamanhoMatriz - 1; i++) {
                 for (j = 1; j < tamanhoMatriz; j++) {
-                    if ((!matriz[i][0].equals(matriz[tamanhoMatriz - 1][j])) && (!(matriz[i][j] != null))) {
+                    if (matriz[i][j] == null) {
                         State s1 = new State(matriz[i][0]);
                         State s2 = new State(matriz[tamanhoMatriz - 1][j]);
                         for (Character c : alphabet) {
                             if ((delta(s1, c) != null) && (delta(s2, c) != null)) {
-                                if ((matriz[buscarIndiceX(delta(s1, c), matriz, tamanhoMatriz)][buscarIndiceY(delta(s2, c), matriz, tamanhoMatriz)] != null) || (matriz[buscarIndiceX(delta(s2, c), matriz, tamanhoMatriz)][buscarIndiceY(delta(s1, c), matriz, tamanhoMatriz)] != null )) {
-                                    if (!(matriz[buscarIndiceX(s1, matriz, tamanhoMatriz)][buscarIndiceY(s2, matriz, tamanhoMatriz)] != null)) {
-                                        matriz[buscarIndiceX(s1, matriz, tamanhoMatriz)][buscarIndiceY(s2, matriz, tamanhoMatriz)] = "X";
+                                if (!delta(s1, c).equals(delta(s2, c))) {
+                                    if ((matriz[buscarIndiceX(delta(s1, c), matriz, tamanhoMatriz)][buscarIndiceY(delta(s2, c), matriz, tamanhoMatriz)] != null) || (matriz[buscarIndiceX(delta(s2, c), matriz, tamanhoMatriz)][buscarIndiceY(delta(s1, c), matriz, tamanhoMatriz)] != null)) {
                                         cambio = true;
-                                    }
-                                    if (!(matriz[buscarIndiceX(s2, matriz, tamanhoMatriz)][buscarIndiceY(s1, matriz, tamanhoMatriz)] != null)) {
+                                        matriz[buscarIndiceX(delta(s1, c), matriz, tamanhoMatriz)][buscarIndiceY(delta(s2, c), matriz, tamanhoMatriz)] = "X";
+                                        matriz[buscarIndiceX(delta(s2, c), matriz, tamanhoMatriz)][buscarIndiceY(delta(s1, c), matriz, tamanhoMatriz)] = "X";
+                                        matriz[i][j] = "X";
                                         matriz[buscarIndiceX(s2, matriz, tamanhoMatriz)][buscarIndiceY(s1, matriz, tamanhoMatriz)] = "X";
-                                        cambio = true;
                                     }
                                 }
                             } else {
-                                if ((delta(s1, c) == null) || (delta(s2, c) == null)) {
+                                if ((delta(s1, c) != null) || (delta(s2, c) != null)) {
                                     matriz[i][j] = "X";
+                                    cambio = true;
+                                    matriz[buscarIndiceX(s2, matriz, tamanhoMatriz)][buscarIndiceY(s1, matriz, tamanhoMatriz)] = "X";
                                 }
                             }
                         }
@@ -623,45 +623,54 @@ public class DFA extends FA {
                 }
             }
         }
-        for (i = 0; i < tamanhoMatriz; i++) {
-            for (j = 0; j < tamanhoMatriz; j++) {
-             //   System.out.println("MATRIZ[" + i + "][" + j + "] TIENE EL VALOR: " + matriz[i][j]);
-            }
-        }
-
-     //   System.out.println("TERMINE LA INDUCCION");
+//                        for (i = 0; i < tamanhoMatriz; i++) {
+//            for (j = 0; j < tamanhoMatriz; j++) {
+//                System.out.println("MATRIZ[" + i + "][" + j + "] TIENE EL VALOR: " + matriz[i][j]);
+//            }
+//        }
+        //   System.out.println("TERMINE LA INDUCCION");
         Set<Set<State>> equivalencias = new HashSet();
-        for (i = 0; i < tamanhoMatriz - 2; i++) { // obtengo las clases de equivalencia
-            for (j = 1; j < tamanhoMatriz - 1; j++) {
+        for (i = 0; i < tamanhoMatriz - 1; i++) { // obtengo las clases de equivalencia
+            for (j = 1; j < tamanhoMatriz; j++) {
                 if (matriz[i][j] == null) {
                     State s1 = new State(matriz[i][0]);
                     State s2 = new State(matriz[tamanhoMatriz - 1][j]);
-                    Set<State> s = new HashSet();
-                    s.add(s1);
-                    s.add(s2);
-                    equivalencias.add(s);
+                    boolean contenia = false;
+                    for (Set<State> sett : equivalencias) {
+                        if (sett.contains(s1) || sett.contains(s2)) {
+                            sett.add(s2);
+                            sett.add(s1);
+                            contenia = true;
+                        }
+                    }
+                    if (!contenia) {
+                        Set<State> s = new HashSet();
+                        s.add(s1);
+                        s.add(s2);
+                        equivalencias.add(s);
+                    }
                 }
             }
         }
-        for (State s : utilizados) {
-            boolean sinEquiv = true;
-            for (Set<State> set : equivalencias) {
-                if (set.contains(s)) {
-                    sinEquiv = false;
-                }
-            }
-            if (sinEquiv) {
-                Set<State> setS = new HashSet();
-                setS.add(s);
-                equivalencias.add(setS);
-            }
-        }
-       // System.out.println("TERMINE LA EQUIVALENCIA");
         if (equivalencias.isEmpty()) { // si no hay clses de equivalencia devuelvo el DFA sin estados inalcanzables
+            System.out.println("RETORNO POR INALCANZABLES");
             return new DFA(utilizados, this.alphabet, transUtilizadas, this.initial, finales);
         } else {
             Set<Triple<State, Character, State>> t = new HashSet();
             Set<State> sNameUnion = new HashSet();
+            for (State s : utilizados) {
+                boolean Equiv = false;
+                for (Set<State> set : equivalencias) {
+                    if (set.contains(s)) {
+                        Equiv = true;
+                    }
+                }
+                if (!Equiv) {
+                    Set<State> setS = new HashSet();
+                    setS.add(s);
+                    equivalencias.add(setS);
+                }
+            }
             for (Set<State> state : equivalencias) {
                 sNameUnion.add(nameUnion(state));
             }
@@ -687,55 +696,76 @@ public class DFA extends FA {
                 }
             }
             State newInitial = perteneceA(equivalencias, this.initial);
-            Set<State> newFinalStates = perteneceAFinal(equivalencias, this.final_states);
+            Set<State> newFinalStates = perteneceAFinal(equivalencias, finales);
             return new DFA(sNameUnion, this.alphabet, t, newInitial, newFinalStates);
         }
     }
-    
-    
-    public boolean lenguajesIguales( DFA l2){
-        DFA dfa1=this.minimize();
-        DFA dfa2= l2.minimize();
-        LinkedList<State> transDfa1= new LinkedList<>();
-        LinkedList<State> transDfa2= new LinkedList<>();
-        State s1;
-        State s2;
-        HashSet<State> yaPase1= new HashSet<>();
-         HashSet<State> yaPase2= new HashSet<>();
-        if( dfa1.alphabet.containsAll(dfa2.alphabet) && dfa2.alphabet.containsAll(dfa1.alphabet) && dfa1.final_states().containsAll(dfa2.final_states())&&  dfa2.final_states().containsAll(dfa1.final_states())){
-       transDfa1.add(dfa1.initial);
-       transDfa2.add(dfa2.initial);
-       while(!transDfa1.isEmpty() && !transDfa2.isEmpty()){
-           s1= transDfa1.removeFirst();
-           yaPase1.add(s1);
-           s2= transDfa2.removeFirst();
-            yaPase2.add(s2);
-        for(Character c: alphabet){
-             s1= dfa1.delta(s1, c);
-             s2= dfa2.delta(s2, c);
-             if(!yaPase1.contains(s1)&& !yaPase2.contains(s2)){
-            if(s1 !=null && s2!=null){
-             transDfa1.addLast(s1);
-             transDfa2.addLast(s2);
+
+    public boolean lenguajesIguales(DFA l2) {
+        boolean interVacia = true;
+        for (Character c : this.alphabet) {
+            if (l2.alphabet.contains(c)) {
+                interVacia = false;
             }
-            else{
-                if(s1!=null || s2!=null)
+        }
+        if (!interVacia) {
+            DFA dfa1 = this.minimize();
+            DFA dfa2 = l2.minimize();
+            LinkedList<State> transDfa1 = new LinkedList<>();
+            LinkedList<State> transDfa2 = new LinkedList<>();
+            State s1;
+            State s2;
+            HashSet<State> yaPase1 = new HashSet<>();
+            HashSet<State> yaPase2 = new HashSet<>();
+            if ((dfa1.states().size() == dfa2.states().size()) && (dfa1.transitions.size() == dfa2.transitions.size()) && (dfa1.final_states.size() == dfa2.final_states.size())) {
+                transDfa1.add(dfa1.initial);
+                transDfa2.add(dfa2.initial);
+                while (!transDfa1.isEmpty() && !transDfa2.isEmpty()) {
+                    s1 = transDfa1.removeFirst();
+                    yaPase1.add(s1);
+                    s2 = transDfa2.removeFirst();
+                    yaPase2.add(s2);
+                    for (Character c : alphabet) {
+                        if (dfa2.alphabet.contains(c)) {
+                            s1 = dfa1.delta(s1, c);
+                            s2 = dfa2.delta(s2, c);
+                            if (s1 != null && s2 != null) {
+                                if (!yaPase1.contains(s1) && !yaPase2.contains(s2)) {
+                                    if ((dfa1.final_states.contains(s1) && dfa2.final_states.contains(s2)) || (!(dfa1.final_states.contains(s1)) && (!dfa2.final_states.contains(s2)))) {
+                                        transDfa1.addLast(s1);
+                                        transDfa2.addLast(s2);
+                                    } else {
+                                        return false;
+                                    }
+                                } else {
+                                    if (!yaPase1.contains(s1) || !yaPase2.contains(s2)) {
+                                        return false;
+                                    }
+                                }
+                            } else {
+                                if (s1 != null || s2 != null) {
+                                    return false;
+                                }
+                            }
+                        } else {
+                            if (dfa1.delta(s1, c) != null) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                if (!transDfa1.isEmpty() || !transDfa2.isEmpty()) {
                     return false;
+                }
+            } else {
+                return false;
             }
-             }
+            return true;
         }
-       }
-       if(!transDfa1.isEmpty() || !transDfa2.isEmpty()){
-           return false;
-       }
-        }
-        else
-            return false;
-        return true;
-        
+        return false;
     }
-    
-     private boolean llegueFinal(State state, boolean llegue){
+
+    private boolean llegueFinal(State state, boolean llegue) {
         if (state != null) {
             marcados.add(state);
             State aux = null;
@@ -748,7 +778,7 @@ public class DFA extends FA {
                     }
                     if (!marcados.contains(aux)) {
                         containsCycles(aux);
-                    } 
+                    }
                 }
             }
 
