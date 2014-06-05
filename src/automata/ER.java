@@ -9,25 +9,27 @@ import java.util.Set;
 import utils.NumeroAleatorio;
 import utils.Triple;
 
-
 /**
  *
  * @author jacinto
  */
 public class ER {
     
-    public NFALambda casoBase(Character c){
+    public ER(){};
+
+    public NFALambda casoBase(Character c) {
         NumeroAleatorio na = new NumeroAleatorio(8);
         Set<State> newStates = new HashSet();
         Set<Character> newAlphabet = new HashSet();
         newAlphabet.add(c);
-        State newInitial = new State("q"+na.generate());
-        State newFinal = new State("q"+na.generate());
+        State newInitial = new State("q" + na.generate());
+        State newFinal = new State("q" + na.generate());
         Set<Triple<State, Character, State>> newTransitions = new HashSet();
-         newTransitions.add(new Triple(newInitial, c, newFinal));      
+        newTransitions.add(new Triple(newInitial, c, newFinal));
         Set<State> newFinal_states = new HashSet();
         newFinal_states.add(newFinal);
+        newStates.add(newFinal);
+        newStates.add(newInitial);
         return new NFALambda(newStates, newAlphabet, newTransitions, newInitial, newFinal_states);
     }
-    
 }

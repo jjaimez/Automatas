@@ -509,6 +509,7 @@ public class DFA extends FA {
         return finalStates;
     }
 
+    //minimizacion de DFA mediante el algortimo de la matiz
     public DFA minimize() {
         LinkedList<State> reachableStates = new LinkedList();
         Set<State> utilizados = new HashSet();
@@ -533,7 +534,6 @@ public class DFA extends FA {
             }
         }
         int tamanhoMatriz = utilizados.size() + 1;
-        // System.out.println("TAMAÑO DE LA MATRIZ UTILIZADOS: " + tamanhoMatriz);
         String[][] matriz = new String[tamanhoMatriz][tamanhoMatriz];
         Iterator it = utilizados.iterator();
         int i = 0;
@@ -557,12 +557,6 @@ public class DFA extends FA {
             }
         }
         matriz[tamanhoMatriz - 1][0] = "X";
-        //HASTA ACA PERFECTO
-//                for (i = 0; i < tamanhoMatriz; i++) {
-//            for (j = 0; j < tamanhoMatriz; j++) {
-//                System.out.println("MATRIZ[" + i + "][" + j + "] TIENE EL VALOR: " + matriz[i][j]);
-//            }
-//        }
         for (i = 0; i < tamanhoMatriz - 1; i++) {
             for (j = 1; j < tamanhoMatriz; j++) {
                 if (matriz[i][j] == null) {
@@ -584,14 +578,7 @@ public class DFA extends FA {
                 }
             }
         }
-        //HASTA ACA ANDA PERFECTO
-//
-//          System.out.println("TERMINE LA INICIALIZACION");
-//        for (i = 0; i < tamanhoMatriz; i++) {
-//            for (j = 0; j < tamanhoMatriz; j++) {
-//                System.out.println("MATRIZ[" + i + "][" + j + "] TIENE EL VALOR: " + matriz[i][j]);
-//            }
-//        }
+        //termino la inicializacion
         boolean cambio = true;
         while (cambio) { // caso inductivo de la minimizacion
             cambio = false;
@@ -623,12 +610,6 @@ public class DFA extends FA {
                 }
             }
         }
-//                        for (i = 0; i < tamanhoMatriz; i++) {
-//            for (j = 0; j < tamanhoMatriz; j++) {
-//                System.out.println("MATRIZ[" + i + "][" + j + "] TIENE EL VALOR: " + matriz[i][j]);
-//            }
-//        }
-        //   System.out.println("TERMINE LA INDUCCION");
         Set<Set<State>> equivalencias = new HashSet();
         for (i = 0; i < tamanhoMatriz - 1; i++) { // obtengo las clases de equivalencia
             for (j = 1; j < tamanhoMatriz; j++) {
@@ -653,7 +634,6 @@ public class DFA extends FA {
             }
         }
         if (equivalencias.isEmpty()) { // si no hay clses de equivalencia devuelvo el DFA sin estados inalcanzables
-            System.out.println("RETORNO POR INALCANZABLES");
             return new DFA(utilizados, this.alphabet, transUtilizadas, this.initial, finales);
         } else {
             Set<Triple<State, Character, State>> t = new HashSet();
@@ -701,6 +681,8 @@ public class DFA extends FA {
         }
     }
 
+    
+    // dado dos automatas nso dice si son iguales, fijandose por cantidad de estados, trans, etc.
     public boolean lenguajesIguales(DFA l2) {
         boolean interVacia = true;
         for (Character c : this.alphabet) {
