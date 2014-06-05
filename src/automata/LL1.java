@@ -24,20 +24,20 @@ public class LL1 {
         if (!palabra.isEmpty()) {
             indice = 0;
             lookAhead = this.palabra[0];
-            System.out.println(S());
+            System.out.println("la cadena ingresada es aceptada por el LL1? "+ palabra.equals(S()));
         }
     }
     /* 
-     SD(S → E $)={(, a}
+     SD(S → E #)={(, a}
      SD(E → T R)={(, a}
      SD(R → + T R)={	+}
-     SD(R → ε)={$, )}
+     SD(R → ε)={#, )}
      SD(T → F Y)={(, a}
      SD(Y → . F Y)={	.}
-     SD(Y → ε)={+, $, )}
+     SD(Y → ε)={+, #, )}
      SD(F → L G)={(, a}
      SD(G → * G)={*}
-     SD(G → ε)={., +, $, )}
+     SD(G → ε)={., +, #, )}
      SD(L → ( E ))={	(}
      SD(L → a)={a}
      */
@@ -48,7 +48,7 @@ public class LL1 {
         Matcher mat = pat.matcher(String.valueOf(lookAhead));
 
         if (mat.matches()) {
-            return (E() + Match('$'));
+            return (E() + Match('#'));
         } else {
             System.err.print("No hay regla S");
             return null;
@@ -109,7 +109,7 @@ public class LL1 {
     }
 
     public String R() {
-        Pattern pat = Pattern.compile("\\+|$|\\)");
+        Pattern pat = Pattern.compile("\\+|#|\\)");
         Matcher mat = pat.matcher(String.valueOf(lookAhead));
         if (mat.matches()) {
             if (lookAhead == '+') {
@@ -119,7 +119,7 @@ public class LL1 {
                 return ("");
             }
         } else {
-            System.out.println(String.valueOf(lookAhead));
+            //System.out.println(String.valueOf(lookAhead));
             System.err.print("No hay regla E_");
             return null;
 
@@ -127,7 +127,7 @@ public class LL1 {
     }
 
     public String Y() {
-        Pattern pat = Pattern.compile(".|\\+|$|\\)");
+        Pattern pat = Pattern.compile(".|\\+|#|\\)");
         Matcher mat = pat.matcher(String.valueOf(lookAhead));
         if (mat.matches()) {
             if (lookAhead == '.') {
@@ -145,7 +145,7 @@ public class LL1 {
     }
 
     public String G() {
-        Pattern pat = Pattern.compile("\\*|.|$|\\+|\\)");
+        Pattern pat = Pattern.compile("\\*|.|#|\\+|\\)");
         Matcher mat = pat.matcher(String.valueOf(lookAhead));
         if (mat.matches()) {
             if (lookAhead == '*') {
@@ -164,11 +164,11 @@ public class LL1 {
         if (lookAhead == simbolo) {
             indice++;
             String ret = String.valueOf(lookAhead);
-            System.out.println(palabra.length);
-            if (indice-2 == palabra.length) {
-
-                lookAhead = palabra[indice];
-            }
+            //System.out.println(palabra.length);
+                if(simbolo!='#')
+                    lookAhead = palabra[indice];
+               // System.out.println(lookAhead);
+           
             return ret;
         } else {
             System.err.print("No machea");
@@ -177,6 +177,6 @@ public class LL1 {
     }
 
     public static void main(String[] args) throws Exception {
-        LL1 ll1 = new LL1("a+a$");
+        LL1 ll1 = new LL1("(a+a)+s*s#");
     }
 }
