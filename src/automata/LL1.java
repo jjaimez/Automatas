@@ -1,22 +1,16 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package automata;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- *
- * @author nico
- */
+
 public class LL1 {
 
     private int indice = -1;
     private char lookAhead;
     private char[] palabra;
+    private String palabraPasada;
 
     public LL1(String palabra) {
 
@@ -24,10 +18,15 @@ public class LL1 {
         if (!palabra.isEmpty()) {
             indice = 0;
             lookAhead = this.palabra[0];
-            System.out.println("la cadena ingresada es aceptada por el LL1? "+ palabra.equals(S()));
+            this.palabraPasada= palabra;
+            //System.out.println("la cadena ingresada es aceptada por el LL1? "+ palabra.equals(S()));
         }
     }
-    /* 
+    
+    public boolean ejecutar(){
+        return palabraPasada.equals(S());
+    }
+    /*
      SD(S → E #)={(, a}
      SD(E → T R)={(, a}
      SD(R → + T R)={	+}
@@ -109,9 +108,9 @@ public class LL1 {
     }
 
     public String R() {
-        Pattern pat = Pattern.compile("\\+|#|\\)");
-        Matcher mat = pat.matcher(String.valueOf(lookAhead));
-        if (mat.matches()) {
+        //Pattern pat = Pattern.compile("\\+|#|\\)");
+        //Matcher mat = pat.matcher(String.valueOf(lookAhead));
+        if (String.valueOf(lookAhead).equals("+")||String.valueOf(lookAhead).equals("#")||String.valueOf(lookAhead).equals(")")) {
             if (lookAhead == '+') {
                 return (Match('+') + T() + R());
             } else {
@@ -127,9 +126,9 @@ public class LL1 {
     }
 
     public String Y() {
-        Pattern pat = Pattern.compile(".|\\+|#|\\)");
-        Matcher mat = pat.matcher(String.valueOf(lookAhead));
-        if (mat.matches()) {
+       // Pattern pat = Pattern.compile(".|\\+|#|\\)");
+       // Matcher mat = pat.matcher(String.valueOf(lookAhead));
+        if (String.valueOf(lookAhead).equals(".")||String.valueOf(lookAhead).equals("+")||String.valueOf(lookAhead).equals("#")||String.valueOf(lookAhead).equals(")")) {
             if (lookAhead == '.') {
                 return (Match('.') + F() + Y());
 
@@ -138,16 +137,16 @@ public class LL1 {
                 return ("");
             }
         } else {
-            System.err.print("No hay regla");
+            System.err.print("No hay regla Y");
             return null;
 
         }
     }
 
     public String G() {
-        Pattern pat = Pattern.compile("\\*|.|#|\\+|\\)");
-        Matcher mat = pat.matcher(String.valueOf(lookAhead));
-        if (mat.matches()) {
+       // Pattern pat = Pattern.compile("*|.|#|\\+|\\)");
+       // Matcher mat = pat.matcher(String.valueOf(lookAhead));
+        if (String.valueOf(lookAhead).equals(".")||String.valueOf(lookAhead).equals("+")||String.valueOf(lookAhead).equals("#")||String.valueOf(lookAhead).equals(")")||String.valueOf(lookAhead).equals("*")) {
             if (lookAhead == '*') {
                 return (Match('*') + G());
             } else {
@@ -155,7 +154,8 @@ public class LL1 {
                 return ("");
             }
         } else {
-            System.err.print("No hay regla");
+            //System.out.println(lookAhead);
+            System.err.print("No hay regla G");
             return null;
         }
     }
@@ -176,7 +176,8 @@ public class LL1 {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        LL1 ll1 = new LL1("(a+a)+s*s#");
-    }
+//    public static void main(String[] args) throws Exception {
+//        LL1 ll1 = new LL1("a+a+(a+a.a*#");
+//        System.out.println(ll1.ejecutar());
+//    }
 }
