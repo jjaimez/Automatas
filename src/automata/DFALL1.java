@@ -3,29 +3,28 @@ package automata;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LL1 {
+public class DFALL1 {
 
     private int indice = -1;
     private char lookAhead;
     private char[] palabra;
-    private String palabraPasada;
     private ER er;
+    private NFALambda nfa;
 
-    public LL1(String palabra) {
+    public DFALL1(String palabra) {
         palabra = palabra + "#";
         this.palabra = palabra.toCharArray();
-         er= new ER();
+        er = new ER();
         if (!palabra.isEmpty()) {
             indice = 0;
             lookAhead = this.palabra[0];
-            this.palabraPasada = palabra;
         }
-       
-        
+
     }
 
-    public boolean ejecutar() {
-        return palabraPasada.equals(S());
+    public DFA ejecutar() {
+
+        return S().toDFA();
     }
     /*
      SD(S → E #)={(, a}
@@ -42,12 +41,14 @@ public class LL1 {
      SD(L → a)={a}
      */
 
-    public String S() {
+    public NFALambda S() {
         Pattern pat = Pattern.compile("[a-z]|\\(");
         Matcher mat = pat.matcher(String.valueOf(lookAhead));
 
         if (mat.matches()) {
-            return (E() + Match('#'));
+            NFALambda e = E(nfa);
+            Match('#');
+            return e;
         } else {
             System.err.print("No hay regla S");
             return null;
@@ -55,49 +56,59 @@ public class LL1 {
 
     }
 
-    public String E() {
+    public NFALambda E(NFALambda aux) {
         Pattern pat = Pattern.compile("[a-z]|\\(");
         Matcher mat = pat.matcher(String.valueOf(lookAhead));
         if (mat.matches()) {
-            return (T() + R());
+            NFALambda t = T(aux);
+            NFALambda r = R(t);
+            return r;
         } else {
             System.err.print("No hay regla E");
             return null;
         }
     }
 
-    public String T() {
+    public NFALambda T(NFALambda aux) {
         Pattern pat = Pattern.compile("[a-z]|\\(");
         Matcher mat = pat.matcher(String.valueOf(lookAhead));
         if (mat.matches()) {
-            return (F() + Y());
+            NFALambda f = F(aux);
+            NFALambda y = Y(f);
+            return y;
         } else {
             System.err.print("No hay regla T");
             return null;
-
         }
     }
 
-    public String F() {
+    public NFALambda F(NFALambda aux) {
         Pattern pat = Pattern.compile("[a-z]|\\(");
         Matcher mat = pat.matcher(String.valueOf(lookAhead));
         if (mat.matches()) {
-            return (L() + G());
+            NFALambda l = L(aux);
+            NFALambda g = G(l);
+            return g;
         } else {
             System.err.print("No hay regla F");
             return null;
         }
     }
 
-    public String L() {
+    public NFALambda L(NFALambda aux) {
         Pattern pat = Pattern.compile("\\(|[a-z]");
         Matcher mat = pat.matcher(String.valueOf(lookAhead));
         if (mat.matches()) {
             if (lookAhead == '(') {
-                return (Match('(') + E() + Match(')'));
+                Match('(');
+                NFALambda e = E(aux);
+                Match(')');
+                return e;
             } else {
+                NFALambda base = er.casoBase(lookAhead);
+                Match(lookAhead);
+                return base;
 
-                return (Match(lookAhead));
             }
         } else {
             System.err.print("No hay regla L");
@@ -106,15 +117,23 @@ public class LL1 {
         }
     }
 
-    public String R() {
+    public NFALambda R(NFALambda aux) {
         //Pattern pat = Pattern.compile("\\+|#|\\)");
         //Matcher mat = pat.matcher(String.valueOf(lookAhead));
         if (String.valueOf(lookAhead).equals("+") || String.valueOf(lookAhead).equals("#") || String.valueOf(lookAhead).equals(")")) {
             if (lookAhead == '+') {
-                return (Match('+') + T() + R());
+                Match('+');
+                NFALambda t = T(aux);
+                NFALambda r = R(t);
+                aux.toDFA().union(r.toDFA());
+                System.out.println(aux.to_dot());
+                System.out.println(r.to_dot());
+                NFALambda n = r.union(aux);
+                System.out.println("se colgó");
+                return n;
+
             } else {
-                //epsilon
-                return ("");
+                return aux;
             }
         } else {
             System.err.print("No hay regla E_");
@@ -122,16 +141,19 @@ public class LL1 {
         }
     }
 
-    public String Y() {
+    public NFALambda Y(NFALambda aux) {
         // Pattern pat = Pattern.compile(".|\\+|#|\\)");
         // Matcher mat = pat.matcher(String.valueOf(lookAhead));
         if (String.valueOf(lookAhead).equals(".") || String.valueOf(lookAhead).equals("+") || String.valueOf(lookAhead).equals("#") || String.valueOf(lookAhead).equals(")")) {
             if (lookAhead == '.') {
-                return (Match('.') + F() + Y());
+
+                Match('.');
+                NFALambda f = F(aux);
+                NFALambda y = Y(f);
+                return aux.concate(y);
 
             } else {
-                //epsilon
-                return ("");
+                return aux;
             }
         } else {
             System.err.print("No hay regla Y");
@@ -139,16 +161,17 @@ public class LL1 {
         }
     }
 
-    public String G() {
+    public NFALambda G(NFALambda aux) {
         // Pattern pat = Pattern.compile("*|.|#|\\+|\\)");
         // Matcher mat = pat.matcher(String.valueOf(lookAhead));
         if (String.valueOf(lookAhead).equals(".") || String.valueOf(lookAhead).equals("+") || String.valueOf(lookAhead).equals("#") || String.valueOf(lookAhead).equals(")") || String.valueOf(lookAhead).equals("*")) {
             if (lookAhead == '*') {
-               // nfa2=nfa1.concate(nfa2.estrella());
-                return (Match('*') + G());
+                // nfa2=nfa1.concate(nfa2.estrella());
+                Match('*');
+                NFALambda g = G(aux);
+                return aux.estrella();
             } else {
-                //epsilon
-                return ("");
+                return aux;
             }
         } else {
             //System.out.println(lookAhead);
@@ -161,23 +184,23 @@ public class LL1 {
         if (lookAhead == simbolo) {
             indice++;
             String ret = String.valueOf(lookAhead);
-           
+
             if (simbolo != '#') {
                 lookAhead = palabra[indice];
 
+            } else {
+
             }
-            else{
-               
-            }
-            
+
             return ret;
         } else {
             System.err.print("No machea");
             return null;
         }
     }
-    public static void main(String[] args) throws Exception {
-        LL1 ll1 = new LL1("a*");
-        System.out.println(ll1.ejecutar());
-    }
+
+//    public static void main(String[] args) throws Exception {
+//        DFALL1 ll1 = new DFALL1("a+(b+c)*.g");
+//        System.out.println(ll1.ejecutar().to_dot());
+//    }
 }
