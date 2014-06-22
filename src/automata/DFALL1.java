@@ -126,11 +126,7 @@ public class DFALL1 {
                 NFALambda t = T(aux);
                 NFALambda r = R(t);
                 aux.toDFA().union(r.toDFA());
-                System.out.println(aux.to_dot());
-                System.out.println(r.to_dot());
                 NFALambda n = r.union(aux);
-                //System.out.println(n.to_dot());
-               System.out.println("se colgó");
                 return n;
 
             } else {
@@ -167,7 +163,6 @@ public class DFALL1 {
         // Matcher mat = pat.matcher(String.valueOf(lookAhead));
         if (String.valueOf(lookAhead).equals(".") || String.valueOf(lookAhead).equals("+") || String.valueOf(lookAhead).equals("#") || String.valueOf(lookAhead).equals(")") || String.valueOf(lookAhead).equals("*")) {
             if (lookAhead == '*') {
-                // nfa2=nfa1.concate(nfa2.estrella());
                 Match('*');
                 NFALambda g = G(aux);
                 return aux.estrella();
@@ -175,7 +170,6 @@ public class DFALL1 {
                 return aux;
             }
         } else {
-            //System.out.println(lookAhead);
             System.err.print("No hay regla G");
             return null;
         }
@@ -200,8 +194,4 @@ public class DFALL1 {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        DFALL1 ll1 = new DFALL1("a+(b+c)*.g");
-        System.out.println(ll1.ejecutar().to_dot());
-    }
 }

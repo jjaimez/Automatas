@@ -144,14 +144,12 @@ public class LL1 {
         // Matcher mat = pat.matcher(String.valueOf(lookAhead));
         if (String.valueOf(lookAhead).equals(".") || String.valueOf(lookAhead).equals("+") || String.valueOf(lookAhead).equals("#") || String.valueOf(lookAhead).equals(")") || String.valueOf(lookAhead).equals("*")) {
             if (lookAhead == '*') {
-               // nfa2=nfa1.concate(nfa2.estrella());
                 return (Match('*') + G());
             } else {
                 //epsilon
                 return ("");
             }
         } else {
-            //System.out.println(lookAhead);
             System.err.print("No hay regla G");
             return null;
         }
@@ -175,9 +173,5 @@ public class LL1 {
             System.err.print("No machea");
             return null;
         }
-    }
-    public static void main(String[] args) throws Exception {
-        LL1 ll1 = new LL1("a*");
-        System.out.println(ll1.ejecutar());
     }
 }
