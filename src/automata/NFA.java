@@ -62,7 +62,7 @@ public class NFA extends FA {
 
     @Override
     public Set<State> delta(State from, Character c) {
-        assert states().contains(from);
+//        assert states().contains(from);
         assert alphabet().contains(c);
         Set<State> s = new HashSet();
         for (Triple t : transitions) {

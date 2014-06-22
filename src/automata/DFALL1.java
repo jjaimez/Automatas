@@ -129,7 +129,8 @@ public class DFALL1 {
                 System.out.println(aux.to_dot());
                 System.out.println(r.to_dot());
                 NFALambda n = r.union(aux);
-                System.out.println("se colgó");
+                //System.out.println(n.to_dot());
+               System.out.println("se colgó");
                 return n;
 
             } else {
@@ -199,8 +200,8 @@ public class DFALL1 {
         }
     }
 
-//    public static void main(String[] args) throws Exception {
-//        DFALL1 ll1 = new DFALL1("a+(b+c)*.g");
-//        System.out.println(ll1.ejecutar().to_dot());
-//    }
+    public static void main(String[] args) throws Exception {
+        DFALL1 ll1 = new DFALL1("a+(b+c)*.g");
+        System.out.println(ll1.ejecutar().to_dot());
+    }
 }

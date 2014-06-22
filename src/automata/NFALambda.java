@@ -433,9 +433,9 @@ public class NFALambda extends FA {
         newTransitions.addAll(nfal2.transitions);
         boolean contiene = true;
         State newInitial = null;
-        while (contiene) {
+        while (contiene) {                    
             contiene = false;
-            newInitial = new State(na.generate());
+            newInitial = new State(na.generate()+na.generate());
             if (this.states.contains(newInitial) || nfal2.states.contains(newInitial)) {
                 contiene = true;
             }
